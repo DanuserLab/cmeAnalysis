@@ -1,5 +1,5 @@
 # cmeAnalysis
-![Alt Text](img/QFSMpkg_img.jpg?raw=true)
+![Alt Text](img/cmeAnalysis.jpg?raw=true)
 
 cmeAnalysis (clathrin-mediated endocytosis analysis) is a MATLAB software package for the quantification of clathrin-coated pit dynamics from fluorescence time-lapse data. The functionalities provided include highly sensitive detection, tracking (based on u-track), master/slave detection for multi-channel data, intensity-based classification of coated structures, and lifetime analysis. Additionally, the package includes a graphical user interface for inspection of analysis results from individual movies.
 The download includes a user guide, and a test data set is available separately.
