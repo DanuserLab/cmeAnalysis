@@ -9,3 +9,8 @@ The download includes a user guide, and a test data set is available separately.
 Release notes: includes improvements to graphical and console output.
 
 For more information, please see [Aguet et al., Dev. Cell 26(3), pp. 279-291, 2013.](http://www.cell.com/developmental-cell/abstract/S1534-5807(13)00382-1)
+
+----------------------
+[Danuser Lab Website](https://www.utsouthwestern.edu/labs/danuser/)
+
+[Software Links](https://www.utsouthwestern.edu/labs/danuser/software/)
