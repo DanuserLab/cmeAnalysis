@@ -23,7 +23,6 @@
 % 
 
 
-
 % function scriptCMEautotest()
 
 % preconditions
@@ -38,41 +37,83 @@ disp(matlab_paths);
 disp(['Java heap max: ' num2str(java.lang.Runtime.getRuntime.maxMemory/1e9) 'GB'])
 disp('Starting cmeAnalysis test script');
 
+% ----------------------------------------------------------------------------
+skip_detection_N_tracking = false
+small_data_set = true
 
-if strcmp(computer('arch'),'win64')
-	data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\';
+if skip_detection_N_tracking
+	% Quick testing--- without running detection and tracking....
+	if small_data_set
+        disp('Running on truncated data set - small');
+		if strcmp(computer('arch'),'win64')
+			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\small\';
+			data_rootEpi = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\';
+		else
+			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/small/';
+			data_rootEpi = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/';
+		end			
+    else
+        disp('Running on large data set - may take some time...');
+        if strcmp(computer('arch'),'win64')
+			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\';
+		else
+			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/';
+		end
+		data_rootEpi = 	data_root;
+	end
+
+	% cmeData_dir = fullfile(data_root, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_control']);
+	cmeData_dir2 = fullfile(data_root, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_mu_PIP2_mutant']);
+	% epiTIRFData_dir = fullfile(data_root, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_control']);
+	epiTIRFData_dir2 = fullfile(data_rootEpi, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_mu_PIP2_mutant']);
+	% ----------------------------------------------------------------------------
 else
-	data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/';
-end	
+	% - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% ----------------------------------------------------------------------------
+	disp('Testing on "clean" data -- including detection and tracking')
+	% no mask yet.. and no tracking
+	if small_data_set
+		disp('Running on truncated data set - small');
+        if strcmp(computer('arch'),'win64')
+			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\clean\small\';
+			data_rootEpi = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\clean\epi_tirf\';
+		else
+			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/clean/small/';
+			data_rootEpi = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/clean/epi_tirf/';
+		end			
+    else
+        disp('Running on large data set - may take some time...');
+        if strcmp(computer('arch'),'win64')
+			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\clean\';
+		else
+			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/clean/';
+		end
+		data_rootEpi = 	data_root;
+	end
 
-% cmeData_dir = fullfile(data_root, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_control']);
-cmeData_dir2 = fullfile(data_root, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_mu_PIP2_mutant']);
+	% ----Initialization of temp dir
+	package_name = 'cmeAnalysis';
+	t_stamp = datestr(now,'ddmmmyyyyHHMMSS');
+	tmpdir = fullfile(tempdir, [package_name '_test_' t_stamp]);
+	mkdir(tmpdir);
 
-% epiTIRFData_dir = fullfile(data_root, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_control']);
-epiTIRFData_dir2 = fullfile(data_root, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_mu_PIP2_mutant']);
+	tic; 
+	disp(['Copying ' data_root 'to ' tmpdir]);
+	copyfile(data_root, tmpdir);
+    if ~strcmp(data_rootEpi,data_root)
+        disp('copying epi tirf data also...')
+        copyfile(data_rootEpi, [tmpdir filesep 'epi_tirf' filesep]);
+    end
+	disp('Done copying')
+	toc
 
-% - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% no mask yet.. and no tracking
-% if strcmp(computer('arch'),'win64')
-% 	data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\clean\';
-% else
-% 	data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/clean/';
-% end	
+	% cmeData_dir = fullfile(data_root, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_control']);
+	cmeData_dir2 = fullfile(tmpdir, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_mu_PIP2_mutant']);
 
-% ----Initialization of temp dir
-% package_name = 'cmeAnalysis';
-% t_stamp = datestr(now,'ddmmmyyyyHHMMSS');
-% tmpdir = fullfile(tempdir, [package_name '_test_' t_stamp]);
-% mkdir(tmpdir);
-
-% disp(['Copying ' data_root 'to ' tmpdir]);
-% copyfile(data_root, tmpdir);
-
-% cmeData_dir = fullfile(data_root, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_control']);
-% cmeData_dir2 = fullfile(tmpdir, ['single_channel' filesep 'Zuzana_ARPE_CLC_egfp_07032014_mu_PIP2_mutant']);
-
-% % epiTIRFData_dir = fullfile(data_root, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_control']);
-% epiTIRFData_dir2 = fullfile(tmpdir, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_mu_PIP2_mutant']);
+	% epiTIRFData_dir = fullfile(data_root, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_control']);
+	epiTIRFData_dir2 = fullfile(tmpdir, ['epi_tirf' filesep 'Zuzana_arpe_clc_egfp_14082015_mu_PIP2_mutant']);
+	% ----------------------------------------------------------------------------
+end
 % - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -129,6 +170,20 @@ plotIntensityDistributions(data2(movie_num)); % works
 % plotInitIntensityVsLifetime(data);  % ???? not used regularly ????
 % ---
 
-%% epiTIRFAnalysis
+%% epiTIRFAnalysis (with prev tracking)
 dataEpi2 = loadConditionData(epiTIRFData_dir2, {'TIRF', 'EPI'}, {'EGFP', 'EGFP'});
 epiTIRFAnalysis({dataEpi2, dataEpi2},  {'EGFP', 'EGFP'}, 9.5); % Still in development
+
+%% Clean up tmpdir
+disp('*****************************************');
+disp('%% !!!!!!!Cleaning up /tmp/ ');
+disp('*****************************************');
+
+cd('~')
+ls(tmpdir)
+rmdir(tmpdir,'s')
+assert(~(exist(tmpdir, 'dir') == 7))
+
+disp('*****************************************');
+disp('%% !!!!!!!done cleaning up /tmp/ ');
+disp('*****************************************');
