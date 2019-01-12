@@ -1,7 +1,7 @@
 %[lengths, value] = binarySegmentLengths(signal) returns the lengths of the successive sequences of 0s and 1s in a binary signal
 % Example: for the signal [0 1 1 0 0 0 1], lengths = [1 2 3 1], value = [0 1 0 1]
 %
-% Copyright (C) 2018, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

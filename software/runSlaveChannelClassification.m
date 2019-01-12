@@ -9,7 +9,7 @@
 % Notes: This function modifies the output of runTrackProcessing(), 
 %        by default saved in Tracking/ProcessedTracks.mat
 %
-% Copyright (C) 2018, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

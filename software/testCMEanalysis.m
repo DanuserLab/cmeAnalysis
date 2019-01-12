@@ -3,7 +3,7 @@
 % Using  locally stored data for now and only testing analysis portion, not detectino/tracking
 % Andrew R. Jamieson 2016
 %
-% Copyright (C) 2018, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

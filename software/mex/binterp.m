@@ -17,7 +17,7 @@
 % [1] Unser, IEEE Signal Proc. Mag. 16(6), pp. 22-38, 1999
 % [2] Unser et al., IEEE Trans. Signal Proc. 41(2), pp. 834-848, 1993
 %
-% Copyright (C) 2018, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
