@@ -131,12 +131,12 @@ switch ip.Results.DisplayMode
             ah0 = 3.5;
         end
         if isempty(XSpace)
-            XSpace = [4 2 2];
+            XSpace = [6 2 2];
         end
         if isempty(YSpace)
             YSpace = [4 2 2]; % Bottom center Top
         end
-        axesFont = {'FontName', 'Arial', 'FontSize', 8};
+        axesFont = {'FontName', 'Arial', 'FontSize', 6};
 end
 tickLength = [0.015 0.025]*6/aw0;
 
