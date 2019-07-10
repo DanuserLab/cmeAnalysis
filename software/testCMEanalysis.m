@@ -49,15 +49,15 @@ if skip_detection_N_tracking
 			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\small\';
 			data_rootEpi = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\';
 		else
-			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/small/';
-			data_rootEpi = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/';
+			data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/CME/xinxin/auto_test/small/';
+			data_rootEpi = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/CME/xinxin/auto_test/';
 		end			
     else
         disp('Running on large data set - may take some time...');
         if strcmp(computer('arch'),'win64')
 			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\';
 		else
-			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/';
+			data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/CME/xinxin/auto_test/';
 		end
 		data_rootEpi = 	data_root;
 	end
@@ -77,16 +77,16 @@ else
         if strcmp(computer('arch'),'win64')
 			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\clean\small\';
 			data_rootEpi = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\clean\epi_tirf\';
-		else
-			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/clean/small/';
-			data_rootEpi = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/clean/epi_tirf/';
+        else
+			data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/CME/xinxin/auto_test/clean/small/';
+			data_rootEpi = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/CME/xinxin/auto_test/clean/epi_tirf/';
 		end			
     else
         disp('Running on large data set - may take some time...');
         if strcmp(computer('arch'),'win64')
 			data_root = 'C:\Users\Andrew\Data\raw\CME\xinxin\auto_test\clean\';
 		else
-			data_root = '/work/bioinformatics/s170480/Data/CME/xinxin/auto_test/clean/';
+			data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/CME/xinxin/auto_test/clean/';
 		end
 		data_rootEpi = 	data_root;
 	end
