@@ -49,7 +49,9 @@ ip.addParameter('AxesWidth', []);
 ip.addParameter('AxesHeight', []);
 ip.addParameter('XSpace', []);
 ip.addParameter('YSpace', []);
-ip.addParameter('DisplayMode', 'print', @(x) any(strcmpi(x, {'print', 'screen','multiple','JCB-Gerlich-paper','JCB-Gerlich-WIPS'})));
+ip.addParameter('DisplayMode', 'print',  ... 
+        @(x) any(strcmpi(x, {   'print', 'screen','multiple', ...
+                                'u-track-3D-paper', 'JCB-Gerlich-paper','JCB-Gerlich-WIPS'})));
 ip.addParameter('InsetPosition', []);
 ip.addParameter('Name', '');
 ip.addParameter('Box', 'off', @(x) any(strcmpi(x, {'on', 'off'})));
@@ -123,6 +125,20 @@ switch ip.Results.DisplayMode
             YSpace = [1.2 1 0.5]; % Bottom center Top
         end
         axesFont = {'FontName', 'Arial', 'FontSize', 8};
+    case 'u-track-3D-paper'
+        if isempty(aw0)
+            aw0 = 6;
+        end
+        if isempty(ah0)
+            ah0 = 3.5;
+        end
+        if isempty(XSpace)
+            XSpace = [2 2 1];
+        end
+        if isempty(YSpace)
+            YSpace = [1.2 1 0.5]; % Bottom center Top
+        end
+        axesFont = {'FontName', 'Helvetica', 'FontSize', 6};
    case 'JCB-Gerlich-WIPS'
         if isempty(aw0)
             aw0 = 6;
