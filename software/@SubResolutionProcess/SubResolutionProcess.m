@@ -1,4 +1,4 @@
-classdef SubResolutionProcess < DetectionProcess
+classdef SubResolutionProcess < DetectionProcess & NonSingularProcess
     % A concrete class for detecting objects using Gaussian mixture-model fitting
     % Chuangang Ren 11/2010
     % Sebastien Besson (last modified Dec 2011)
