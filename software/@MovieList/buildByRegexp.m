@@ -1,4 +1,4 @@
-function ML = buildByRegexp(filter,outputDirectory)
+function ML = buildByRegexp(filter,outputDirectory,findMatsInDirs)
 % Build a MovieList using a regular expression.
 %
 % INPUT
@@ -35,10 +35,25 @@ function ML = buildByRegexp(filter,outputDirectory)
     if(nargin < 2)
         outputDirectory = pwd;
     end
+    if(nargin < 3)
+        findMatsInDirs = true;
+    end
     D = dir;
-    D = D([D.isdir]);
-    D = D(~cellfun(@(x) isempty(regexp(x,filter, 'once')),{D.name}));
-    movieDataFileNames = strcat(pwd,filesep,{D.name},filesep,{D.name},'.mat');
+    if(findMatsInDirs)
+        D = D([D.isdir]);
+        D = D(~cellfun(@(x) isempty(regexp(x,filter, 'once')),{D.name}));
+        movieDataFileNames = strcat(pwd,filesep,{D.name},filesep,{D.name},'.mat');
+    else
+        D = D(~cellfun(@(x) isempty(regexp(x,filter, 'once')),{D.name}));
+        movieDataFileNames = {D.name};
+        disp(movieDataFileNames(:));
+        x = input('Create [new] MovieData objects by loading these files Y/N [N]?: ','s');
+        if(isempty(x) || x(1) ~= 'Y')
+            disp('MovieList not created');
+            return;
+        end
+        movieDataFileNames = cellfun(@MovieData.load,{D.name},'Unif',false);
+    end
     ML = MovieList(movieDataFileNames,outputDirectory);
     ML.sanityCheck;
 end
