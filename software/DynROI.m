@@ -138,16 +138,21 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
         MDFile=[outputDir filesep 'analysis' filesep 'movieData.mat'];
     end
 
-    function [MDout,MDFile]=swapDynBoundingBox(obj,MD,subFolder)
+    function [MDout,MDFile]=swapDynBoundingBox(obj,MD,subFolder,varargin)
+        ip = inputParser;
+        ip.addParameter('outputDir', [MD.outputDirectory_ filesep subFolder]);
+        parse(ip, varargin{:})
+        p = ip.Results;
+        
         % Swap the box bounding the dynROI in the default ref. 
         ZXRatio=MD.pixelSizeZ_/MD.pixelSize_;
 
-        outputDir=[MD.outputDirectory_ filesep subFolder filesep];
+%         outputDir=[MD.outputDirectory_ filesep subFolder filesep];
         channelList(numel(MD.channels_))=Channel();
 
         for cIdx=1:numel(MD.channels_)
             stackLoader = arrayfun(@(f) @(f)(MD.channels_(cIdx).loadStack(f)),1:(MD.nFrames_),'unif',0);
-            chFolder=[outputDir filesep 'ch' num2str(cIdx) filesep];
+            chFolder=[p.outputDir filesep 'ch' num2str(cIdx) filesep];
             mkClrDir(chFolder);
             filePattern=[chFolder filesep 'subvol-ch-' num2str(cIdx) '-frame-%04d.tif'];
 
@@ -161,12 +166,12 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
         end
 
         tiffReader=TiffSeriesReader({channelList.channelPath_},'force3D',true);
-        MDout=MovieData(channelList,[outputDir 'analysis'],'movieDataFileName_','movieData.mat','movieDataPath_',[outputDir filesep 'analysis'], ...
+        MDout=MovieData(channelList,[p.outputDir filesep 'analysis'],'movieDataFileName_','movieData.mat','movieDataPath_',[p.outputDir filesep 'analysis'], ...
             'pixelSize_',MD.pixelSize_,'pixelSizeZ_',MD.pixelSize_,'timeInterval_',MD.timeInterval_);
         MDout.setReader(tiffReader);
         MDout.sanityCheck(); % the usual fucking performance killer...
         MDout.save();
-        MDFile=[outputDir filesep 'analysis' filesep 'movieData.mat'];
+        MDFile=[p.outputDir filesep 'analysis' filesep 'movieData.mat'];
     end
     
     function [subVol,minCoord,maxCoord] = getSubVol(obj,vol,ZXRatio,frameIdx)
