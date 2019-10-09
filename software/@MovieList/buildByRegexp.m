@@ -55,5 +55,9 @@ function ML = buildByRegexp(filter,outputDirectory,findMatsInDirs)
         movieDataFileNames = cellfun(@MovieData.load,{D.name},'Unif',false);
     end
     ML = MovieList(movieDataFileNames,outputDirectory);
-    ML.sanityCheck;
+    try
+        ML.sanityCheck;
+    catch err
+        disp(getReport(err));
+    end
 end
