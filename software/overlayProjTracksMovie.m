@@ -148,7 +148,7 @@ imLoader= @(fIdx)(processProj.loadFrame(1,fIdx));
 imSaved=cell(1,numel(processFrames));
 
 
-parfor fIdxIdx=1:numel(processFrames)
+for fIdxIdx=1:numel(processFrames)
   fIdx=processFrames(fIdxIdx);
   [XYProj,ZYProj,ZXProj,three]=feval(imLoader,fIdx);
   % dIdx=find(fIdx==detFrame);

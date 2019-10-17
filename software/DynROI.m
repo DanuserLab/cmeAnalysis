@@ -79,7 +79,6 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
             minCoord=[1 1 1];
             maxCoord=[MD.imSize_(2) MD.imSize_(1) MD.zSize_*ZXRatio];
         end
-
         parfor f=processFrames
             vol=stackLoader{1}(f);
             % For added robustness, works if DynROI is a dummy
@@ -201,7 +200,9 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
         minZBorderCurr=minZBorderFull - orig(3); maxZBorderCurr=maxZBorderFull - orig(3);
         
         inputRef=imref3d(size(vol), ...
-            [minXBorderCurr maxXBorderCurr], [minYBorderCurr maxYBorderCurr], [minZBorderCurr maxZBorderCurr]);
+            [minXBorderCurr maxXBorderCurr], ...
+            [minYBorderCurr maxYBorderCurr], ...
+            [minZBorderCurr maxZBorderCurr]);
         
         [minCoord,maxCoord]=obj.getBoundingBox(ref);
         maxXBorder=maxCoord(1);
@@ -218,12 +219,15 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
         minZBorderCurr=(minZBorder);
         maxZBorderCurr=(maxZBorder);
         
-        rotOutputRef=imref3d([    ceil(maxYBorderCurr-minYBorderCurr)+1 ...
-            ceil(maxXBorderCurr-minXBorderCurr)+1 ...
-            ceil(maxZBorderCurr-minZBorderCurr)+1 ], ...
-             [minXBorderCurr maxXBorderCurr], [minYBorderCurr maxYBorderCurr], [minZBorderCurr maxZBorderCurr]);
-       
-        B=ref.getBase(frameIdx);
+        rotOutputRef=imref3d([  (maxYBorderCurr-minYBorderCurr)                       ...
+                                (maxXBorderCurr-minXBorderCurr)                       ...
+                                (maxZBorderCurr-minZBorderCurr) ],                    ...
+                                [minXBorderCurr maxXBorderCurr], ...
+                                [minYBorderCurr maxYBorderCurr], ...
+                                [minZBorderCurr maxZBorderCurr]);
+        A=ref.getAffineTransform(frameIdx);
+        A.T
+        B=ref.getBase(frameIdx)
         tformRotOnly=affine3d();
         tformRotOnly.T(1:3,1:3)=B(:,[1 2 3]);
         subVol=imwarp(vol,inputRef,tformRotOnly,'OutputView',rotOutputRef);

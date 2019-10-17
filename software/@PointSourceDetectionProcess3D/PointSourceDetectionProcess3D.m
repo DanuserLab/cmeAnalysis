@@ -95,7 +95,7 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
                             % Only show Detections in Z. 
                             zThick = 1;
                             tt = table(v1.xCoord(:,1), v1.yCoord(:,1), v1.zCoord(:,1), 'VariableNames', {'xCoord','yCoord','zCoord'});
-                            valid_states = (tt.zCoord>=(iZ-zThick) & tt.zCoord<=(iZ+zThick));
+                            valid_states = ((tt.zCoord/ZXRatio)>=(iZ-zThick) & (tt.zCoord/ZXRatio)<=(iZ+zThick));
                             dataOut = tt{valid_states, :};
 
                             if isempty(dataOut) || numel(dataOut) <1 || ~any(valid_states)

@@ -39,7 +39,6 @@ XRatio=size(img,2)/(XLimit(2)-XLimit(1));
 YRatio=size(img,1)/(YLimit(2)-YLimit(1));
 detColors=colormap;
 
-
 if(~isempty(detections))
     for fIdx=1:length(detections)
         d=detections(fIdx);

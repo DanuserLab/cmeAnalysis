@@ -61,6 +61,9 @@ if(isa(processProj,'ExternalProcess'))
 end
 
 
+Z=detections.getAllStruct().z;
+disp(['Z range from ' num2str(min(Z)) ' to ' num2str(max(Z)) ' at ' num2str(max(Z)-min(Z))]);
+
 ref=get(processProj,'ref');
 if(~isempty(ref))
     % Ugly hack to fix lack of detection frameID support
@@ -78,6 +81,10 @@ if(~isempty(ref))
     end    
 end
 projData=processProj;
+
+
+Z=detections.getAllStruct().z;
+disp(['Z range from ' num2str(min(Z)) ' to ' num2str(max(Z)) ' at ' num2str(max(Z)-min(Z))]);
 
 
 frameNb=min([projData.frameNb,length(detections)]);

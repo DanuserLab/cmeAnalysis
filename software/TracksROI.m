@@ -197,8 +197,8 @@ classdef TracksROI < DynROI
                 minYBorder=(minY-fringeWidth);
                 minZBorder=(minZ-fringeWidth);
             end
-            minCoord=[minXBorder minYBorder minZBorder];
-            maxCoord=[maxXBorder maxYBorder maxZBorder];
+            minCoord=floor([minXBorder minYBorder minZBorder]);
+            maxCoord=ceil([maxXBorder maxYBorder maxZBorder]);
         end
 
     end
