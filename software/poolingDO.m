@@ -1,19 +1,7 @@
-function copyright = getLCCBCopyright()
+function [uniqueX, cdfval] = poolingDO(DOstruct)
+% [uniqueX, cdfval] = poolingDO(DOstruct)
 %
-% This is a user-defined function used in UTSW software. 
-% It is called when any GUI is generated. It configures the copyright
-% information.
-%
-% Input: 
-%
-%
-% Output:
-%
-%   copyright - String: copyright and version information
-%
-% Chuangang Ren, 11/2010
-% Sebastien Besson, Feb 2013
-% Andrew Jamieson, Nov 2016 - UTSW
+% Jungsik Noh, 02/20/2017
 %
 % Copyright (C) 2019, Danuser Lab - UTSouthwestern 
 %
@@ -34,7 +22,35 @@ function copyright = getLCCBCopyright()
 % 
 % 
 
-% Set year and version information
-str_year = datestr(date,'YYYY');
-copyright = sprintf('Copyright %s Danuser Lab - UTSouthwestern', str_year);
-% -- TEST CI pipeline deploy to GITHUB -- CI pipeline build # 68935
+%% add relfreq
+
+tmpDO = DOstruct;
+len = numel(DOstruct);
+
+for i=1:len
+    cumfreq = DOstruct(i).cdfval;
+    relfreq = [cumfreq(1); diff(cumfreq)];
+    tmpDO(i).relfreq = relfreq(:);
+end
+
+xxcell = {tmpDO.uniqueX}';
+relfreqcell = {tmpDO.relfreq}';
+pxx = cell2mat(xxcell);
+prelfreq = cell2mat(relfreqcell);
+
+[xx, ord] = sort(pxx);
+freq0 = prelfreq(ord);
+freq1 = freq0./sum(freq0);
+%freq1 = freq0./len;
+tmp = rle(xx);
+uniqueX = tmp(1:2:end);
+rlen = tmp(2:2:end);
+uniqueInd = cumsum(rlen);
+cumfreq = cumsum(freq1);
+cdfval = cumfreq(uniqueInd);
+
+uniqueX = uniqueX(:);
+cdfval = cdfval(:);
+
+
+end

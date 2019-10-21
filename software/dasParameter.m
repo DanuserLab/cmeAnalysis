@@ -1,0 +1,129 @@
+
+function [pm] = dasParameter(num_condition, dir_alt, varargin)
+
+ip = inputParser;
+ip.CaseSensitive = false;
+ip.addRequired('num_condition', @(x) isnumeric(x));
+ip.addRequired('dir_alt', @(x) ischar(x));
+ip.addParameter('overwriteTrack_info', false, @islogical);
+ip.addParameter('overwriteDAS', true, @islogical);
+ip.addParameter('overwriteCluster', true, @islogical);
+ip.addParameter('overwriteStat', true, @islogical);
+ip.addParameter('num_clus', 3, @isnumeric);
+ip.addParameter('recalculateD', false, @islogical);
+ip.addParameter('kmeans_ctrl_only', true, @islogical);
+ip.addParameter('save_image', true, @islogical);
+ip.addParameter('plot_fig1', true, @islogical);
+ip.addParameter('scheme_p', 1, @isnumeric);
+ip.addParameter('plot_visitor',true,@islogical);
+ip.addParameter('cohort_norm',true,@islogical);
+ip.addParameter('plot_EpiTIRF',false,@islogical);
+ip.addParameter('fig1_LT_Imax_stack',true,@islogical);
+ip.addParameter('plot_mode',false,@islogical);
+ip.addParameter('fig1_mosaic',false,@islogical);
+ip.addParameter('cohort_diff',false,@islogical);
+ip.addParameter('plot_cohort',true,@islogical);
+ip.addParameter('PaperPosition', [0 0 5 5], @isnumeric);
+ip.addParameter('pdf_conf',true,@islogical);
+ip.addParameter('ch1_name','Master',@ischar);
+ip.addParameter('ch2_name','Slave',@ischar);
+ip.addParameter('fig_dir','default',@ischar);
+ip.addParameter('coh_buff',true,@islogical);
+ip.addParameter('ch_col', [], @isnumeric);
+ip.addParameter('CohortBounds_s_ccp', [15 25]);
+ip.addParameter('CohortBounds_s_visitor', [15 25]);
+ip.addParameter('CohortBounds_s_ftn', [15 25]);
+ip.addParameter('h_tirf', 115, @isnumeric);
+ip.addParameter('i_max_D', 300, @isnumeric);
+ip.addParameter('i_max_D_adj',true,@islogical);
+ip.addParameter('show_med_or_mean',true,@islogical);
+ip.parse(num_condition, dir_alt, varargin{:});
+num_condition = ip.Results.num_condition;
+dir_alt = ip.Results.dir_alt;
+fig_dir = ip.Results.fig_dir;
+if strcmp(fig_dir,'default')
+    fig_dir = [dir_alt filesep 'figure'];
+end
+%--------------------------------------------------------------------------------------------------------
+%================================================================================
+%
+% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+%
+% This file is part of CMEAnalysis_Package.
+% 
+% CMEAnalysis_Package is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% CMEAnalysis_Package is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
+% 
+% 
+
+pm = struct(...
+    'overwriteTrack_info', ip.Results.overwriteTrack_info,...
+    'overwriteDAS', ip.Results.overwriteDAS, ...
+    'overwriteCluster', ip.Results.overwriteCluster, ...
+    'overwriteStat', ip.Results.overwriteStat,...
+    'num_clus', ip.Results.num_clus, ...
+    'recalculateD', ip.Results.recalculateD,...
+    'kmeans_ctrl_only',ip.Results.kmeans_ctrl_only,...
+    'save_image',ip.Results.save_image,...
+    'color_clus', [],...
+    'col_cond', [],...
+    'scheme_p', ip.Results.scheme_p,...
+    'plot_visitor', ip.Results.plot_visitor,...
+	'label1', '$d_2$',...
+	'label2', '$d_1$',...
+	'label3', '$d_3$',...
+    'cohort_norm', ip.Results.cohort_norm,...
+    'plot_EpiTIRF', ip.Results.plot_EpiTIRF,...
+    'fig1_LT_Imax_stack', ip.Results.fig1_LT_Imax_stack,...
+    'fig1_mosaic', ip.Results.fig1_mosaic,...
+    'plot_mode', ip.Results.plot_mode,...
+    'cohort_diff', ip.Results.cohort_diff,...
+    'plot_cohort', ip.Results.plot_cohort,...
+    'PaperPosition',ip.Results.PaperPosition,...
+    'pdf_conf',ip.Results.pdf_conf,...
+    'fig_dir',fig_dir,...
+    'ch1_name',ip.Results.ch1_name,...
+    'ch2_name',ip.Results.ch2_name,...
+    'coh_buff',ip.Results.coh_buff,...
+    'ch_col',ip.Results.ch_col,...
+    'CohortBounds_s_ccp',ip.Results.CohortBounds_s_ccp,...
+    'CohortBounds_s_visitor',ip.Results.CohortBounds_s_visitor,...
+    'CohortBounds_s_ftn',ip.Results.CohortBounds_s_ftn,...
+    'h_tirf',ip.Results.h_tirf,...
+    'i_max_D',ip.Results.i_max_D,...
+    'i_max_D_adj',ip.Results.i_max_D_adj,...
+    'show_med_or_mean',ip.Results.show_med_or_mean,...
+    'n_bar',5,...
+    'plot_fig1',ip.Results.plot_fig1...
+     );
+pm.color_clus = cell(pm.num_clus,1); 
+pm.color_clus{1} = [0 0 1]; 
+pm.color_clus{2} = [0 1 0]; 
+pm.color_clus{3} = [1 0 0];
+
+pm.col_cond = zeros(num_condition,3);
+col_cond_tem =[0         0         0;0.1497    0.4951    0.3462;0.9238    0.4963    0.7922;0.5071    0.8137    0.0103;0.2328    0.5026    0.6808];
+if num_condition < 5
+    pm.col_cond(1:num_condition,:) = col_cond_tem(1:num_condition,:);
+else
+    pm.col_cond(1:5,:) = col_cond_tem(1:5,:);
+    pm.col_cond(6:num_condition,:) = col_cond_tem(6:num_condition,:);
+end
+
+         
+    
+    
+    
+    
+
+

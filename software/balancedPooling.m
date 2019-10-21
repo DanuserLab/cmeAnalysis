@@ -1,19 +1,6 @@
-function copyright = getLCCBCopyright()
+function pooledVec = balancedPooling(dataCell)
 %
-% This is a user-defined function used in UTSW software. 
-% It is called when any GUI is generated. It configures the copyright
-% information.
-%
-% Input: 
-%
-%
-% Output:
-%
-%   copyright - String: copyright and version information
-%
-% Chuangang Ren, 11/2010
-% Sebastien Besson, Feb 2013
-% Andrew Jamieson, Nov 2016 - UTSW
+% J Noh, 2017/11/20
 %
 % Copyright (C) 2019, Danuser Lab - UTSouthwestern 
 %
@@ -34,7 +21,16 @@ function copyright = getLCCBCopyright()
 % 
 % 
 
-% Set year and version information
-str_year = datestr(date,'YYYY');
-copyright = sprintf('Copyright %s Danuser Lab - UTSouthwestern', str_year);
-% -- TEST CI pipeline deploy to GITHUB -- CI pipeline build # 68935
+nvec = cellfun(@numel, dataCell);
+nmed = round(median(nvec));
+
+balancedCell = cell(numel(nvec), 1);
+
+for i = 1:numel(nvec)
+    resamplei = quantile(dataCell{i}, [0.5:nmed-0.5]./nmed);
+    balancedCell{i} = resamplei';
+end
+
+pooledVec = cell2mat(balancedCell);
+
+end

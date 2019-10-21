@@ -1,19 +1,6 @@
-function copyright = getLCCBCopyright()
+function [cdfVec, indVec] = cdfVector(xSorted, sortedUniqueX, cdfval)
 %
-% This is a user-defined function used in UTSW software. 
-% It is called when any GUI is generated. It configures the copyright
-% information.
-%
-% Input: 
-%
-%
-% Output:
-%
-%   copyright - String: copyright and version information
-%
-% Chuangang Ren, 11/2010
-% Sebastien Besson, Feb 2013
-% Andrew Jamieson, Nov 2016 - UTSW
+% Jungsik Noh, 02/25/2017
 %
 % Copyright (C) 2019, Danuser Lab - UTSouthwestern 
 %
@@ -34,7 +21,27 @@ function copyright = getLCCBCopyright()
 % 
 % 
 
-% Set year and version information
-str_year = datestr(date,'YYYY');
-copyright = sprintf('Copyright %s Danuser Lab - UTSouthwestern', str_year);
-% -- TEST CI pipeline deploy to GITHUB -- CI pipeline build # 68935
+M = numel(xSorted);
+indVec = nan(M, 1);
+cdfVec = ones(M, 1);
+
+imax = numel(sortedUniqueX);
+i = 1;
+
+for j = 1:M
+    while (i < imax) && (sortedUniqueX(i) <= xSorted(j))
+        i=i+1;
+    end
+    
+    if (i == imax); break; end
+    if (i == 1)
+        indVec(j) = 0;
+        cdfVec(j) = 0;
+    else
+        indVec(j) = i-1;
+        cdfVec(j) = cdfval(i-1);
+    end
+end
+
+%
+end
