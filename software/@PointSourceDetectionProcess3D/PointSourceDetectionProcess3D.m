@@ -223,6 +223,7 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
             funParams.RefineMaskValid = false;
             funParams.ClearMaskBorder = true;
             funParams.processBuildDynROI=[];
+            funParams.buildDynROIProcessChannel=1;
             funParams.saveMaskFilePattern=[];
             funParams.samplePos=[];
 

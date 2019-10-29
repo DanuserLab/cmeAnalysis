@@ -448,6 +448,7 @@ classdef TrackingProcess < DataProcessingProcess & NonSingularProcess
                 funParams.probDim = 3;
                 funParams.EstimateTrackability=false;
                 funParams.processBuildDynROI=[]; % DynROI used for computation
+                funParams.buildDynROIProcessChannel=1;
                 funParams.saveResults.exportTrackabilityData = 1; %FLAG allow exporting Kalman filter variable
             else
                 funParams.probDim = 2;
