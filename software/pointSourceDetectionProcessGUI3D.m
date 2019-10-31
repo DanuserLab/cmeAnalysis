@@ -301,6 +301,7 @@ funParams.MaskProcessIndex = props{1}{props{2}};
 funParams.UseIntersection = get(handles.edit_UseIntersection,'Value') > 0;
 
 % Retrieve GUI-defined parameters for Build Dyn ROI process:
+userData = get(handles.figure1,'UserData');
 
 if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
   %Get selected DynROI channels
