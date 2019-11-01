@@ -183,11 +183,17 @@ if isequal(userData.procConstr, @TrackingDynROIProcess)
   % Update channels listboxes depending on the selected process
   popupmenu_BuildDynROIProcessIndex_Callback(hObject, eventdata, handles)
 else
+  uipanel_DynROIProc_posi = get(handles.uipanel_DynROIProc, 'Position');
+  hgtDiff = uipanel_DynROIProc_posi(4) + 7;
   delete(handles.uipanel_DynROIProc);
-  set(handles.checkbox_applytoall, 'Position', [22, 13+244, 223, 20]);
-  set(handles.pushbutton_cancel, 'Position', [385, 10+244, 107, 22]);
-  set(handles.pushbutton_done, 'Position', [495, 10+244, 107, 22]);
-%   set(handles.figure1, 'Position', [624, 219, 613, 576]);
+  set(handles.uipanel_kalman,'position', (get(handles.uipanel_kalman,'position') - [0 hgtDiff 0 0]));
+  set(handles.uipanel_costfunction,'position', (get(handles.uipanel_costfunction,'position') - [0 hgtDiff 0 0]));
+  set(handles.uipanel_parameters,'position', (get(handles.uipanel_parameters,'position') - [0 hgtDiff 0 0]));
+  set(handles.uipanel_input,'position', (get(handles.uipanel_input,'position') - [0 hgtDiff 0 0]));
+  set(handles.text_processName,'position', (get(handles.text_processName,'position') - [0 hgtDiff 0 0]));
+  set(handles.axes_help,'position', (get(handles.axes_help,'position') - [0 hgtDiff 0 0]));
+  set(handles.text_copyright,'position', (get(handles.text_copyright,'position') - [0 hgtDiff 0 0]));
+  set(handles.figure1, 'Position', (get(handles.figure1,'position') - [0 -100 0 hgtDiff]));  
 end
 
 
