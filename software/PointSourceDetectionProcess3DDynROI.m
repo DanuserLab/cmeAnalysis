@@ -99,7 +99,7 @@ classdef PointSourceDetectionProcess3DDynROI < PointSourceDetectionProcess3D
             funParams.RefineMaskValid = false;
             funParams.ClearMaskBorder = true;
             funParams.processBuildDynROI=[];
-            funParams.buildDynROIProcessChannel=1;
+            funParams.buildDynROIProcessChannel=1; % Added for the setting GUI, but not used in the wrapper func.
             funParams.saveMaskFilePattern=[];
             funParams.samplePos=[];
 

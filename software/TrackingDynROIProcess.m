@@ -309,7 +309,7 @@ classdef TrackingDynROIProcess < TrackingProcess
             funParams.ChannelIndex = 1:numel(owner.channels_);
             funParams.EstimateTrackability=false;
             funParams.processBuildDynROI=[]; % DynROI used for computation
-            funParams.buildDynROIProcessChannel=1;
+            funParams.buildDynROIProcessChannel=1; % Added for the setting GUI, but not used in the wrapper func.
             
             % should detect for which channels a detection process output exists.
             funParams.DetProcessIndex = []; % perhaps tag by process & channel

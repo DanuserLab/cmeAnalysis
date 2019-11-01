@@ -193,7 +193,7 @@ else
   set(handles.text_processName,'position', (get(handles.text_processName,'position') - [0 hgtDiff 0 0]));
   set(handles.axes_help,'position', (get(handles.axes_help,'position') - [0 hgtDiff 0 0]));
   set(handles.text_copyright,'position', (get(handles.text_copyright,'position') - [0 hgtDiff 0 0]));
-  set(handles.figure1, 'Position', (get(handles.figure1,'position') - [0 -100 0 hgtDiff]));  
+  set(handles.figure1, 'Position', (get(handles.figure1,'position') - [0 0 0 hgtDiff]));  
 end
 
 
