@@ -59,7 +59,7 @@ if(~isempty(detections))
             X=X*XRatio;
             Y=Y*YRatio;
             if(iscell(p.radius))
-                radius=ceil(p.radius{fIdx}*XRatio);
+                radius=ceil(p.radius{min(end,fIdx)}*XRatio);
             else
                 radius=ceil(p.radius*XRatio);
             end

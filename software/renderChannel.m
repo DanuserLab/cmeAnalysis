@@ -16,6 +16,10 @@ function RGBVol=renderChannel(ch1,ch2,type,varargin)
         case 'grayRedMix'
             img=sc(ch1,'gray')+sc(ch2,'gray').*sc(ch2,'-autumn');
             RGBVol=uint8(255*img);
+        case 'grayRedMix2'
+            deepRed=linspaceNDim([0 0 0],[255 0 0],256)';
+            img=sc(ch1,'gray')+sc(ch2,'gray').*sc(ch2,deepRed);
+            RGBVol=uint8(255*img);
         case 'redGrayMix'
             img=sc(ch2,'gray')+sc(ch1,'gray').*sc(ch1,'-autumn');
             RGBVol=uint8(255*img);

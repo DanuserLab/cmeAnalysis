@@ -206,7 +206,7 @@ if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
   popupmenu_BuildDynROIProcessIndex_Callback(hObject, eventdata, handles)
 else
   uipanel_DynROIProc_posi = get(handles.uipanel_DynROIProc, 'Position');
-  widthDiff = uipanel_DynROIProc_posi(3) + 10;
+  widthDiff = uipanel_DynROIProc_posi(3);
   delete(handles.uipanel_DynROIProc);
   set(handles.figure1, 'Position', (get(handles.figure1,'position') - [0 0 widthDiff 0]));
 end

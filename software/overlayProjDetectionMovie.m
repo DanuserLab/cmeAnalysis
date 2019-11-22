@@ -166,8 +166,8 @@ for fIdx=processFrames
     ZXProj=pCell3{fIdx};
     fRadii=radii;
     if(cumulative)
-        detectionsAtFrame=detections;
-        fColorIndx=colorIndx;
+        detectionsAtFrame=detections(processFrames);
+        fColorIndx=colorIndx(processFrames);
     else
         dIdx=find(fIdx==detFrame);
         if(~isempty(dIdx))
@@ -195,7 +195,7 @@ for fIdx=processFrames
     end
     % detectionsAtFrame.getAllStruct()
     % detectionsAtFrame.zCoord(:,1)=detectionsAtFrame.zCoord(:,1)/0.378;
-    [overlayXY,overlayZY,overlayZX,keptIdx(fIdx)]=overlayProjDetections( ... 
+    [overlayXY,overlayZY,overlayZX]=overlayProjDetections( ... 
         XYProj,ZYProj,ZXProj,xBound,yBound,zBound, ...
         detectionsAtFrame,acolormap,fColorIndx, ...
         'positionsLabel',positionsLabel,'printVectorFile',printVectorFile,varargin{:},'radius',fRadii);

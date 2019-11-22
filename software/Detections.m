@@ -64,6 +64,7 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
 ,           end
         end
 
+
         function values=getLabel(obj,labelName)
             values=cell(1,numel(obj));
             for i=1:numel(values)   
@@ -403,6 +404,19 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
             end
             end
         end     
+
+
+
+        function obj= appendPos(obj, XYZ,amp,XYZErr,ampErr)
+           nDet=numel(obj);
+            for i=1:nDet
+                obj(i).xCoord=[obj(i).xCoord; [XYZ(1) XYZErr(1)]];
+                obj(i).yCoord=[obj(i).yCoord; [XYZ(2) XYZErr(2)]];
+                obj(i).zCoord=[obj(i).zCoord; [XYZ(3) XYZErr(3)]];
+                obj(i).amp=[obj(i).amp; [amp ampErr]];
+            end
+        end
+
 
         function [detIndexCell,objIndexCell]=findCloseDetections(obj,det,radii)
             % Find the point in det that are with in a radius from obj.
@@ -871,7 +885,11 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
                     end
                 end
             else
-                assert(numel(obj)==numel(indices));
+                if(numel(obj)>numel(indices))
+                    indices=[indices cell(1,numel(obj)-numel(indices))];
+                else
+                    indices=indices(1:numel(obj));
+                end
                 arrayfun(@(i) selectIdx(obj(i),indices{i}),1:numel(indices),'unif',0);
             end
         end        

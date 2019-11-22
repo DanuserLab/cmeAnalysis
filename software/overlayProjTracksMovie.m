@@ -16,7 +16,7 @@ function projImages=overlayProjTracksMovie(processProj,varargin)
   ip.addParameter('minMaxLabel',[]);
   ip.addParameter('detectionFrameIdx',[]);  % Useful for decimation: specify the frame associated to each detection 
   ip.addParameter('saveVideo',false);
-  ip.addParameter('useGraph',false);
+  ip.addParameter('useGraph',true);
   ip.addParameter('name','tracks');
   ip.parse(processProj,varargin{:});
   p=ip.Results;

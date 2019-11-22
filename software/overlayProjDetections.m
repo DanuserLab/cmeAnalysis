@@ -69,8 +69,9 @@ ip.parse(varargin{:});
             positionsLabel{dIdx}=positionsLabel{dIdx}(keepIndx{dIdx});
           end
           colorIndx{dIdx}=colorIndx{dIdx}(keepIndx{dIdx});
-          if(numel(radius{dIdx})>1)
-                radius{dIdx}=radius{dIdx}(keepIndx{dIdx});
+          rdIdx=min(numel(radius),dIdx);
+          if(numel(radius{rdIdx})>1)
+                radius{rdIdx}=radius{rdIdx}(keepIndx{rdIdx});
           end
       end
       detections=detections.copy().selectIdx(keepIndx);
