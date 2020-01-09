@@ -20,7 +20,7 @@ function varargout = pointSourceDetectionProcessGUI3D(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -41,7 +41,7 @@ function varargout = pointSourceDetectionProcessGUI3D(varargin)
 
 % Edit the above text to modify the response to help anisoGaussianDetectionProcessGUI
 
-% Last Modified by GUIDE v2.5 25-Oct-2019 16:14:21
+% Last Modified by GUIDE v2.5 09-Jan-2020 14:00:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -170,6 +170,9 @@ popupmenu_SegProcessIndex_Callback(hObject, eventdata, handles)
 %Update channel parameter selection dropdown
 popupmenu_CurrentChannel_Callback(hObject, eventdata, handles)
 
+% Add Scales parameter to the GUI
+set(handles.edit_scales, 'String',num2str(funParams.scales))
+
 
 if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
   % Set up available Build Dyn ROI channels
@@ -269,6 +272,13 @@ if isempty(get(handles.listbox_selectedChannels, 'String'))
     return;
 end
 
+if any(isnan(str2num(get(handles.edit_scales, 'String')))) ...
+    || any(str2num(get(handles.edit_scales, 'String')) < 0) ...
+    || isempty(get(handles.edit_scales, 'String'))
+  errordlg('Please provide a valid input for ''Scales''.','Setting Error','modal');
+  return;
+end
+
 %Save the currently set per-channel parameters
 pushbutton_saveChannelParams_Callback(hObject, eventdata, handles)
 
@@ -318,6 +328,9 @@ if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
     funParams.processBuildDynROI = [];
   end
 end
+
+% Add Scales parameter to the GUI
+funParams.scales = str2num(get(handles.edit_scales, 'String'));
 
 % Add 64-bit warning
 is64bit = ~isempty(regexp(computer ,'64$', 'once'));
@@ -1562,6 +1575,29 @@ function edit_filterSigmaZ_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function edit_filterSigmaZ_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_filterSigmaZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_scales_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_scales (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_scales as text
+%        str2double(get(hObject,'String')) returns contents of edit_scales as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_scales_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_scales (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

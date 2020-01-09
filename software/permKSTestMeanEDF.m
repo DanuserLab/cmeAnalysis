@@ -13,7 +13,7 @@ function [H, pValue] = permKSTestMeanEDF(d1, d2, varargin)
 % Reference:
 % [1] Efron, B. and Tibshirani, R., "An introduction to the Bootstrap," Ch. 15, 1993.
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

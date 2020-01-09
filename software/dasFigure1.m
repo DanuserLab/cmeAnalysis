@@ -35,7 +35,7 @@ col_scatter = ip.Results.col_scatter;
 col_scatter_edge = ip.Results.col_scatter_edge;
 %==========================================================================
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

@@ -22,7 +22,7 @@ ip.addParameter('Bandwidth', 0.05, @isnumeric);
 ip.parse(data, pm, alt_dir, varargin{:});
 %==================================================
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

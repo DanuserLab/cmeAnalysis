@@ -19,7 +19,7 @@ function figout = distnObj_plotCDFs_BootCI(DO_ctrl, DO_trt, ctlName, trtName, va
 % Jungsik Noh, 2018/02/13. Add 'save' option.
 % Jungsik Noh, 2018/02/04.
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

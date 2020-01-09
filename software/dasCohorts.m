@@ -47,7 +47,7 @@ ip.addParameter('b', 5, @isnumeric);
 ip.addParameter('master_adj', 0, @isnumeric);
 %==========================================================================
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

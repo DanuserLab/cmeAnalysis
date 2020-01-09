@@ -1,7 +1,7 @@
 function [trackabilityCost,sampledPredictions,sampleLabel,votingLabel,trackabilityCostFull]=simulatedPredictionVoting(predStat,costFunc,costMatParam,dynCostMatParam,varargin)
     %% Using normally distributed sampling to test the answer of the LAP for any given cost matrix.
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

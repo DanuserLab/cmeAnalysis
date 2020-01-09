@@ -52,7 +52,7 @@ fig_pdf = distnObj_plotPDFs_BootCI(Tab1, Tab2, Name1, Name2, varName, ...
 
 % StatAnal (2) distnObj_plotCDFs_BootCI 
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

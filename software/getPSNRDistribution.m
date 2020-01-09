@@ -2,7 +2,7 @@
 % The PSNR is calculated as A^2*ni/RSS where 'ni' is the number of pixels in the support
 % used for fitting.
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
