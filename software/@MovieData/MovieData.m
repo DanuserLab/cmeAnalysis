@@ -458,6 +458,7 @@ classdef  MovieData < MovieObject & matlab.mixin.Heterogeneous
                 disp('Saving movie');
                 obj.save();
             end
+            disp('Sanity check is finished!');
         end
 
         function checkDimensions(obj)

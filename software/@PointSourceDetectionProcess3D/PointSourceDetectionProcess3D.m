@@ -65,7 +65,12 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
             projAxis3D = ip.Results.projectionAxis3D;
             iZ = ip.Results.iZ;
             varargout = cell(numel(output), 1);
-            ZXRatio = obj.owner_.pixelSizeZ_/obj.owner_.pixelSize_;              
+            ZXRatio = obj.owner_.pixelSizeZ_/obj.owner_.pixelSize_;   
+            if isa(obj,'PointSourceDetectionProcess3DDynROI')
+                s = cached.load(obj.funParams_.processBuildDynROI.outFilePaths_{3,1}, '-useCache', true);
+                s1 = cached.load(s.movieDataDynROICell{1}, '-useCache', true); % s1.MD is a movieData built based on DynROI raw images.
+                ZXRatio = s1.MD.pixelSizeZ_/s1.MD.pixelSize_;
+            end
 
             if ischar(output),output={output}; end
             
