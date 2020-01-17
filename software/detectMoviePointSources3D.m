@@ -58,10 +58,12 @@ p = parseProcessParams(pointSourceDetProc3D, paramsIn);
 
 % precondition / error checking
 if isa(pointSourceDetProc3D, 'PointSourceDetectionProcess3DDynROI')
-    buildDynROIProcId = movieData.getProcessIndex('BuildDynROIProcess'); % if numel(buildDynROIProcId) > 1, popup window will show and let user to choose which BuildDynROIProcess.
-    if isempty(buildDynROIProcId)
-        error("BuildDynROIProcess needs to be done before run PointSourceDetectionProcess3DDynROI.")
-    elseif ~ismember(1, movieData.processes_{buildDynROIProcId}.funParams_.ChannelIndex)
+%     If numel(buildDynROIProcId) > 1, popup window will show and let user to choose which BuildDynROIProcess. 
+%     Later, added in the setting GUI for user to select a BuildDynROIProcess, so comment out.
+%     buildDynROIProcId = movieData.getProcessIndex('BuildDynROIProcess');
+    if isempty(p.processBuildDynROI)
+        error("BuildDynROIProcess needs to be done and selected in setting before run PointSourceDetectionProcess3DDynROI.")
+    elseif ~ismember(1, p.processBuildDynROI.funParams_.ChannelIndex)
         error("Channel 1 in BuildDynROIProcess needs to be analyzed before run PointSourceDetectionProcess3DDynROI.")
     end
 end
