@@ -1,12 +1,12 @@
 function [trackedFeatureIndx,trackedFeatureInfo,kalmanFilterInfo,...
-    nnDistFeatures,prevCost,errFlag,trackabilityData] = linkFeaturesKalmanSparse(movieInfo,...
-    costMatName,costMatParam,kalmanFunctions,probDim,filterInfoPrev,...
-    prevCost,verbose,varargin)
+    nnDistFeatures,prevCost,errFlag] = linkFeaturesKalmanSparse(movieInfo,...
+    costMatFunc,costMatParam,kalmanFunctions,probDim,filterInfoPrev,...
+    prevCost,verbose)
 %LINKFEATURESKALMAN links features between consecutive frames using LAP and possibly motion propagation using the Kalman filter
 %
 %SYNOPSIS [trackedFeatureIndx,trackedFeatureInfo,kalmanFilterInfo,...
 %    nnDistFeatures,prevCost,errFlag] = linkFeaturesKalmanSparse(movieInfo,...
-%    costMatName,costMatParam,kalmanFunctions,probDim,filterInfoPrev,...
+%    costMatFunc,costMatParam,kalmanFunctions,probDim,filterInfoPrev,...
 %    prevCost,verbose)
 %
 %INPUT  movieInfo      : Array of size equal to the number of frames
@@ -31,7 +31,8 @@ function [trackedFeatureIndx,trackedFeatureInfo,kalmanFilterInfo,...
 %                            matrix. Optional. Calculated if not supplied.
 %             .nnDist      : Distance from each feature to its nearest
 %                            neighbor. Optional. Calculated if not supplied.
-%       costMatName    : Name of cost matrix function used for linking.
+%    %%%costMatName    : Name of cost matrix function used for linking. % Replaced!!!!!
+%       costMatFunc    : Function handle pointing to the cost matrix function used for linking. % Updated by Carmen Klein Herenbrink and Brian Devree
 %       costMatParam   : Parameters needed for cost matrix calculation. 
 %                        Structure with fields specified by particular
 %                        cost matrix used (costMatName).
@@ -86,6 +87,12 @@ function [trackedFeatureIndx,trackedFeatureInfo,kalmanFilterInfo,...
 %        features at all. However, the very first frame must not be empty.
 %
 %Khuloud Jaqaman, March 2007
+%
+% Updated in Jan 2020 to incorporate the changes made by Carmen Klein Herenbrink 
+% and Brian Devree from Copenhagen University to reduce the tracking time.
+% Changes made in this function are modified the code to pass the function named 
+% "costMatRandomDirectedSwitchingMotionLink" as a handle, instead of calling it through 
+% an eval statement.
 %
 % Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
@@ -171,16 +178,6 @@ if errFlag
     disp('--linkFeaturesKalmanSparse: Please fix input parameters.');
     return
 end
-
-% To discuss: I propose to add new param through varargin to reduce 
-ip = inputParser;
-ip.CaseSensitive = false;
-ip.KeepUnmatched = true;
-ip.addParameter('estimateTrackability',false);
-ip.parse(varargin{:});
-p=ip.Results;
-
-
 
 %% preamble
 
@@ -291,24 +288,6 @@ if selfAdaptive
     
 end
 
-%store the costs of previous links for features in first frame
-%if no previous costs have been input
-%in this case, store NaN since there are no previous links
-if isempty(prevCost)
-    prevCost = NaN(movieInfo(1).num,1);
-else
-    prevCost = max(prevCost(:))*ones(movieInfo(1).num,1);
-end
-prevCostStruct.all = prevCost;
-prevCostStruct.max = max(prevCost(:));
-prevCostStruct.allAux = [];
-
-%assign the lifetime of features in first frame
-featLifetime = ones(movieInfo(1).num,1);
-
-% % % %for paper - get number of potential link per feature
-% % % numPotLinksPerFeature = [];
-
 %get number of particles in whole movie and calculate a worst-case scenario
 %number of tracks
 %it can be that the final number of tracks is even larger than this worst
@@ -323,17 +302,29 @@ nnDistFeaturesAux = NaN(numTracksWorstCase,numFrames);
 prevCostAux = NaN(numTracksWorstCase,numFrames);
 rowEnd = numTracksWorstCase;
 
+%store the costs of previous links for features in first frame
+%if no previous costs have been input
+%in this case, store NaN since there are no previous links
+if isempty(prevCost)
+    prevCost = NaN(movieInfo(1).num,1);
+else
+    prevCost = max(prevCost(:))*ones(movieInfo(1).num,1);
+end
+prevCostStruct.all = prevCost;
+prevCostStruct.max = max(prevCost(:));
+% prevCostStruct.allAux = [];
+prevCostStruct.allAux = HandleObject(prevCostAux); % Updated by Carmen Klein Herenbrink and Brian Devree
+
+%assign the lifetime of features in first frame
+featLifetime = ones(movieInfo(1).num,1);
+
+% % % %for paper - get number of potential link per feature
+% % % numPotLinksPerFeature = [];
+
 %initialize progress display
 if verbose
     progressText(0,'Linking frame-to-frame');
 end
-
-%% To join in trackabilityData
-samplesDetections(length(movieInfo))=Detections();
-trackabilityCost=cell(1,length(movieInfo));
-samplingLabel=cell(1,length(movieInfo));
-votingLabel=cell(1,length(movieInfo));
-trackabilityCostFull=cell(1,length(movieInfo));
 
 %go over all frames
 for iFrame = 1 : numFrames-1
@@ -347,26 +338,14 @@ for iFrame = 1 : numFrames-1
         if numFeaturesFrame2 ~= 0 %if there are features in 2nd frame
             
             %calculate cost matrix
-            if(p.estimateTrackability)
-                %% Summarizing dynamic parameter for readability
-                dynCostMatParam.movieInfo=movieInfo;
-                dynCostMatParam.iFrame=iFrame;
-                dynCostMatParam.prevCostStruct=prevCostStruct;
-                dynCostMatParam.probDim=probDim;
-                dynCostMatParam.nnDistFeatures=nnDistFeatures(1:numFeaturesFrame1,:);
-                dynCostMatParam.movieInfo=movieInfo;
-                dynCostMatParam.featLifetime=featLifetime;
-                dynCostMatParam.trackedFeatureIndx=trackedFeatureIndx;
-
-                [trackabilityCost{iFrame},samplesDetections(iFrame),samplingLabel{iFrame},votingLabel{iFrame},trackabilityCostFull{iFrame}]= ...
-                    simulatedPredictionVoting(kalmanFilterInfo(iFrame),costMatName,costMatParam,dynCostMatParam);
-
-            end
             % -- USER DEFINED FUNCTION -- %
-            eval(['[costMat,propagationScheme,kalmanFilterInfoTmp,nonlinkMarker]'...
-                ' = ' costMatName '(movieInfo,kalmanFilterInfo(iFrame),'...
-                'costMatParam,nnDistFeatures(1:numFeaturesFrame1,:),'...
-                'probDim,prevCostStruct,featLifetime,trackedFeatureIndx,iFrame);'])
+            % eval(['[costMat,propagationScheme,kalmanFilterInfoTmp,nonlinkMarker]'...
+            %     ' = ' costMatName '(movieInfo,kalmanFilterInfo(iFrame),'...
+            %     'costMatParam,nnDistFeatures(1:numFeaturesFrame1,:),'...
+            %     'probDim,prevCostStruct,featLifetime,trackedFeatureIndx,iFrame);'])
+            [costMat,propagationScheme,kalmanFilterInfoTmp,nonlinkMarker] = costMatFunc(...
+                movieInfo,kalmanFilterInfo(iFrame),costMatParam,nnDistFeatures(1:numFeaturesFrame1,:),...
+                probDim,prevCostStruct,featLifetime,trackedFeatureIndx,iFrame); % Updated by Carmen Klein Herenbrink and Brian Devree
 
             % % %             %for paper - get number of potential links per feature
             % % %             numPotLinksPerFeature = [numPotLinksPerFeature; sum(...
@@ -630,7 +609,8 @@ for iFrame = 1 : numFrames-1
     %update structure of previous costs
     prevCostStruct.all = prevCost;
     prevCostStruct.max = max([prevCostStruct.max; prevCost(:,end)]);
-    prevCostStruct.allAux = prevCostAux;
+    % prevCostStruct.allAux = prevCostAux;
+    % prevCostStruct.allAux = HandleObject(prevCostAux); % Updated by Carmen Klein Herenbrink and Brian Devree
     
     %display progress
     if verbose
@@ -638,19 +618,6 @@ for iFrame = 1 : numFrames-1
     end
     
 end %(for iFrame=1:numFrames-1)
-
-lastFrameDet=Detections(movieInfo(end));
-samplesDetections(end)=Detections(movieInfo(end));
-trackabilityCost{end}=ones(lastFrameDet.getCard(),1);
-trackabilityCostFull{end}=zeros(lastFrameDet.getCard(),3);
-samplingLabel{end}=ones(lastFrameDet.getCard(),1);
-votingLabel{end}=ones(lastFrameDet.getCard(),1);
-
-trackabilityData.samplesDetections=samplesDetections;
-trackabilityData.trackabilityCost=trackabilityCost;
-trackabilityData.trackabilityCostFull=trackabilityCostFull;
-trackabilityData.samplingLabel=samplingLabel;
-trackabilityData.votingLabel=votingLabel;
 
 %add information from last frame to auxiliary matrices
 numRows = size(trackedFeatureIndx,1);
