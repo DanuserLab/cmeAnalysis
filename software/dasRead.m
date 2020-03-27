@@ -6,6 +6,7 @@ ip.addRequired('data', @(x) isstruct(x));
 ip.addRequired('master_dir', @(x) ischar(x));
 ip.addParameter('saveTrack_info', true, @islogical);
 ip.addParameter('Category', {'Ia'}, @iscell);
+ip.addParameter('TimeThreshold', inf, @isnumeric);
 ip.parse(data, master_dir, varargin{:});
 
 data = ip.Results.data;
@@ -37,6 +38,7 @@ cd(master_dir);
 % 
 
 Category = ip.Results.Category;
+TimeThreshold=ip.Results.TimeThreshold;
 %--------------------------------------------------------------------------
 movie_num = max(size(data));
 %--------------------------------------------------------------------------
@@ -50,6 +52,10 @@ end
 
 %==========================================================================
     disp('reading tracks ...');
+    i_track = cell(movie_num,1);
+    for i_movie = 1:movie_num
+        i_track{i_movie} = 1;
+    end
 parfor i_movie = 1:movie_num
     %--------------------------------------------------------------------------
     frame_num = data(i_movie).movieLength;
@@ -62,7 +68,7 @@ parfor i_movie = 1:movie_num
     nsb = numel(track(1).startBuffer.t);
     neb = numel(track(1).endBuffer.t);
 %--------------------------------------------------------------------------
-Track_info{i_movie}.Track_num = track_num;
+Track_info{i_movie}.Track_num = 0;
 Track_info{i_movie}.Track_id = (1:Track_info{i_movie}.Track_num)';
 Track_info{i_movie}.Valid = [];
 Track_info{i_movie}.LT = zeros(Track_info{i_movie}.Track_num,1);
@@ -79,28 +85,52 @@ Track_info{i_movie}.ebSigma_r = nan(Track_info{i_movie}.Track_num,neb);
 Track_info{i_movie}.Sigma_r = nan(Track_info{i_movie}.Track_num,frame_num);
 %--------------------------------------------------------------------------
 i_ch = 1;
-    for i_track = 1:Track_info{i_movie}.Track_num
-        Track_info{i_movie}.LT(i_track) = track(i_track).lifetime_s/Track_info{i_movie}.frameRate;
-        Track_info{i_movie}.Max(i_track) = max(track(i_track).A(i_ch,:));
-        Track_info{i_movie}.A(i_track,1:Track_info{i_movie}.LT(i_track)) = track(i_track).A(i_ch,1:Track_info{i_movie}.LT(i_track));
-        Track_info{i_movie}.Sigma_r(i_track,1:Track_info{i_movie}.LT(i_track)) = track(i_track).sigma_r(i_ch,1:Track_info{i_movie}.LT(i_track));
-        %Track_info{i_movie}.A(i_track,1:Track_info{i_movie}.LT(i_track)) = track(i_track).A(1:Track_info{i_movie}.LT(i_track))./exp(-0.08*track(i_track).t(1:Track_info{i_movie}.LT(i_track)));
-        %Track_info{i_movie}.A(i_track,1:Track_info{i_movie}.LT(i_track)) = track(i_track).A(Track_info{i_movie}.LT(i_track):-1:1);
-        Track_info{i_movie}.x(i_track,1:Track_info{i_movie}.LT(i_track)) = floor(track(i_track).x(i_ch,:)+0.5);
-        Track_info{i_movie}.y(i_track,1:Track_info{i_movie}.LT(i_track)) = floor(track(i_track).y(i_ch,:)+0.5);
-        Track_info{i_movie}.t(i_track,1:Track_info{i_movie}.LT(i_track)) = track(i_track).t(:);
-        %Track_info{i_movie}.A(i_track,1:Track_info{i_movie}.LT(i_track)) = Track_info{i_movie}.A(i_track,1:Track_info{i_movie}.LT(i_track)) ./ exp(-0.0068*Track_info{i_movie}.t(i_track,1:Track_info{i_movie}.LT(i_track)))/611*109;
-        %Track_info{i_movie}.Max(i_track) = max(Track_info{i_movie}.A(i_track,1:Track_info{i_movie}.LT(i_track)));
-        Track_info{i_movie}.sbA(i_track,:) = track(i_track).startBuffer.A(i_ch,:);
-        Track_info{i_movie}.ebA(i_track,:) = track(i_track).endBuffer.A(i_ch,:);
-        Track_info{i_movie}.sbSigma_r(i_track,:) = track(i_track).startBuffer.sigma_r(i_ch,:);
-        Track_info{i_movie}.ebSigma_r(i_track,:) = track(i_track).endBuffer.sigma_r(i_ch,:);
+    for i_tem = 1:track_num
+        if track(i_tem).t(1) < TimeThreshold
+        Track_info{i_movie}.LT(i_track{i_movie}) = track(i_track{i_movie}).lifetime_s/Track_info{i_movie}.frameRate;
+        Track_info{i_movie}.Max(i_track{i_movie}) = max(track(i_track{i_movie}).A(i_ch,:));
+        Track_info{i_movie}.A(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = track(i_track{i_movie}).A(i_ch,1:Track_info{i_movie}.LT(i_track{i_movie}));
+        Track_info{i_movie}.Sigma_r(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = track(i_track{i_movie}).sigma_r(i_ch,1:Track_info{i_movie}.LT(i_track{i_movie}));
+        %Track_info{i_movie}.A(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = track(i_track{i_movie}).A(1:Track_info{i_movie}.LT(i_track{i_movie}))./exp(-0.08*track(i_track{i_movie}).t(1:Track_info{i_movie}.LT(i_track{i_movie})));
+        %Track_info{i_movie}.A(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = track(i_track{i_movie}).A(Track_info{i_movie}.LT(i_track{i_movie}):-1:1);
+        Track_info{i_movie}.x(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = floor(track(i_track{i_movie}).x(i_ch,:)+0.5);
+        Track_info{i_movie}.y(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = floor(track(i_track{i_movie}).y(i_ch,:)+0.5);
+        Track_info{i_movie}.t(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = track(i_track{i_movie}).t(:);
+        %Track_info{i_movie}.A(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) = Track_info{i_movie}.A(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})) ./ exp(-0.0068*Track_info{i_movie}.t(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})))/611*109;
+        %Track_info{i_movie}.Max(i_track{i_movie}) = max(Track_info{i_movie}.A(i_track{i_movie},1:Track_info{i_movie}.LT(i_track{i_movie})));
+        Track_info{i_movie}.sbA(i_track{i_movie},:) = track(i_track{i_movie}).startBuffer.A(i_ch,:);
+        Track_info{i_movie}.ebA(i_track{i_movie},:) = track(i_track{i_movie}).endBuffer.A(i_ch,:);
+        Track_info{i_movie}.sbSigma_r(i_track{i_movie},:) = track(i_track{i_movie}).startBuffer.sigma_r(i_ch,:);
+        Track_info{i_movie}.ebSigma_r(i_track{i_movie},:) = track(i_track{i_movie}).endBuffer.sigma_r(i_ch,:);
+        Track_info{i_movie}.Track_num = Track_info{i_movie}.Track_num+1;   
+        Track_info{i_movie}.Track_id(i_track{i_movie}) = i_track{i_movie};
+        i_track{i_movie} = i_track{i_movie}+1;
+        end
     end
     %--------------------------------------------------------------------------
 %==========================================================================
 
 %==========================================================================
 end
+
+for i_movie = 1:movie_num
+    n = Track_info{i_movie}.Track_num;
+Track_info{i_movie}.Track_id(n+1:end) = [];
+Track_info{i_movie}.Valid = [];
+Track_info{i_movie}.LT(n+1:end) = [];
+Track_info{i_movie}.Max(n+1:end) = [];
+Track_info{i_movie}.A(n+1:end,:) = [];
+Track_info{i_movie}.x(n+1:end,:) = [];
+Track_info{i_movie}.y(n+1:end,:) = [];
+Track_info{i_movie}.t(n+1:end,:) = [];
+Track_info{i_movie}.sbA(n+1:end,:) = [];
+Track_info{i_movie}.ebA(n+1:end,:) = [];
+Track_info{i_movie}.sbSigma_r(n+1:end,:) = [];
+Track_info{i_movie}.ebSigma_r(n+1:end,:) = [];
+Track_info{i_movie}.Sigma_r(n+1:end,:) = [];
+Track_info{i_movie}.LT = Track_info{i_movie}.LT';
+end
+    
 
 
 

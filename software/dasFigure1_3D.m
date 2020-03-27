@@ -1,38 +1,26 @@
 
 
-function [figH] = dasFigure1_3D(data, DAS_all,Track_info, DAS_stat, idx, Cx, con_name,dir_alt,pm,figH,varargin)
+function [figH] = dasFigure1_3D(DAS_all,DAS_stat, idx, pm,figH,varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('data', @(x) iscell(x));
 ip.addRequired('DAS_all', @(x) iscell(x));
-ip.addRequired('Track_info', @(x) iscell(x));
 ip.addRequired('DAS_stat', @(x) iscell(x));
 ip.addRequired('idx', @(x) iscell(x));
-ip.addRequired('Cx', @(x) iscell(x));
-ip.addRequired('con_name', @(x) iscell(x));
-ip.addRequired('dir_alt', @(x) ischar(x));
 ip.addRequired('pm', @(x) isstruct(x));
 ip.addRequired('figH', @(x) iscell(x));
 ip.addParameter('fix_cluster_num', 2, @isnumeric);
 ip.addParameter('Z_rep', [-0.2, -4; -0.8, -2], @isnumeric);
 ip.addParameter('i_condition', 1, @isnumeric);
 ip.addParameter('fig_name', 'fig1_3D', @ischar);
-ip.parse(data, DAS_all, Track_info,DAS_stat, idx, Cx, con_name,dir_alt, pm,figH,varargin{:});
+ip.parse(DAS_all,DAS_stat, idx, pm,figH,varargin{:});
 
 
 DAS_all = ip.Results.DAS_all;
-con_name = ip.Results.con_name;
-num_condition = max(size(DAS_all));
 idx = ip.Results.idx;
-Z_rep = ip.Results.Z_rep;
-data = ip.Results.data;
-dir_alt = ip.Results.dir_alt;
-Track_info = ip.Results.Track_info;
+
 DAS_stat = ip.Results.DAS_stat;
-Cx = ip.Results.Cx;
 i_condition = ip.Results.i_condition;
-fig_name = ip.Results.fig_name;
 pm=ip.Results.pm;
 figH = ip.Results.figH;
 %==========================================================================
@@ -72,7 +60,7 @@ color_clus = pm.color_clus;
     Y = DAS_all{i_condition}.DAS;
     Z = DAS_all{i_condition}.DAS_3./sqrt(DAS_all{i_condition}.DAS_2).^3;
     Z_org=[X,Y,Z];
-    Z_norm=[normalize(X,'zscore'),normalize(Y,'zscore'),normalize(Z,'zscore')];
+    
     %-------------------------------------------------------------------------
     axis_lim = [min(DAS_stat{i_condition}.edges_d_dv{1}) max(DAS_stat{i_condition}.edges_d_dv{1});...
                 min(DAS_stat{i_condition}.edges_d_dv{2}) max(DAS_stat{i_condition}.edges_d_dv{2});...
@@ -208,13 +196,3 @@ zlabel(label3,'interpreter','latex');
 light('Position',[-0.2 -0.2 1],'Style','infinite');
 %camlight
 view([-30 30]);
-
-
-
-
-
-
-
-
-
-

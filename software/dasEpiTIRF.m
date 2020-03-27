@@ -1,14 +1,8 @@
-function [fig_exist,z,z_err] = dasEpiTIRF(data, dir_alt, pm, con_name, DAS_stat, DAS_all, idx, varargin)
+function [fig_exist,z,z_err] = dasEpiTIRF(pm, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('data', @iscell);
-ip.addRequired('dir_alt', @(x) ischar(x));
 ip.addRequired('pm', @(x) isstruct(x));
-ip.addRequired('con_name', @(x) iscell(x));
-ip.addRequired('DAS_stat', @iscell);
-ip.addRequired('DAS_all', @iscell);
-ip.addRequired('idx', @iscell);
 ip.addParameter('b', 5, @isnumeric);
 %==========================================================================
 %
@@ -30,15 +24,12 @@ ip.addParameter('b', 5, @isnumeric);
 % along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
 % 
 % 
-ip.parse(data, dir_alt, pm, con_name,DAS_stat, DAS_all, idx, varargin{:});
+ip.parse(pm, varargin{:});
 %==========================================================================
-data = ip.Results.data;
 pm = ip.Results.pm;
-dir_alt=ip.Results.dir_alt;
-con_name = ip.Results.con_name;
-DAS_stat = ip.Results.DAS_stat;
-DAS_all = ip.Results.DAS_all;
-idx = ip.Results.idx;
+data = pm.data_all;
+dir_alt=pm.dir_alt;
+
 b = ip.Results.b;
 CohortBounds_s_ccp = pm.CohortBounds_s_ccp;
 CohortBounds_s_visitor = pm.CohortBounds_s_visitor;
@@ -64,7 +55,6 @@ end
 %bound_s = [5 15 25 35 45 55 65 ];
 bound_s = CohortBounds_s_ccp;
 
-t_fit1 = 2+b;t_fit2 = 10+b;
 %bound_s = [0 20 40 60 80 100 120 140 160 180 200];
 % fig_tem = dasCohorts(data, DAS_all, idx,dir_alt, pm,...
 %     'CohortBounds_s_ccp', CohortBounds_s_ccp,...
@@ -106,6 +96,7 @@ varlist = [Ie It];
 n_var = numel(varlist);
 
 for i=1:n_cond
+    %figure;hold on;
     for ic = 1:pm.num_clus
         for c = 1:n_coh(i,ic)
             if ((ic == 1) || ((ic == 2) && (CohortBounds_s_visitor(2)>0)) || ((ic == 3) && (CohortBounds_s_ftn(2)>0)))
@@ -114,21 +105,57 @@ e=S.res_c{i,ic}.A_mean_t{c}(2,:);
 t=S.res{i,ic}.A_mean_t{c}(2,:);
 ttem=S.res{i,ic}.A_mean_t{c}(1,:);
 %-----------------------------------
-ytem=t;
-ptem=polyfit(ttem(t_fit1:t_fit2),ytem(t_fit1:t_fit2),3);
-It0 = polyval(ptem,ttem(t_fit1));
-dptem = polyder(ptem);
-kt=polyval(dptem,ttem(t_fit1));
-ytem=e;
-ptem=polyfit(ttem(t_fit1:t_fit2),ytem(t_fit1:t_fit2),3);
-Ie0 = polyval(ptem,ttem(t_fit1));
-dptem = polyder(ptem);
-ke=polyval(dptem,ttem(t_fit1));
+t_z0 = b+1; 
+ytem=t; 
+o_fit = 1;
 
+rsq = zeros(10,1);
+for i_fit = 4: 10
+t_fit1 = b+1;t_fit2 = b+i_fit;
+t_to_fit = [t_fit1:t_fit1+1,t_fit1+3:t_fit2];
+[ptem,~]=polyfit(ttem(t_to_fit),ytem(t_to_fit),o_fit);
+yfit =  ptem(1) * ttem(t_to_fit) + ptem(2);
+yresid = ytem(t_to_fit)-yfit;
+SSresid = sum(yresid.^2);
+SStotal = (length(ytem(t_to_fit))-1) * var(ytem(t_to_fit));
+rsq(i_fit) = 1 - SSresid/SStotal;
+end
+[~,i_opt] = max(rsq);
+t_fit1 = b+1;t_fit2 = b+i_opt;
+t_to_fit = [t_fit1:t_fit1+1,t_fit1+3:t_fit2];
+[ptem,~]=polyfit(ttem(t_to_fit),ytem(t_to_fit),o_fit);
+
+%plot(ttem(t_fit1:t_fit2),ytem(t_fit1:t_fit2),'*');hold on;plot(ttem(t_fit1):0.1:ttem(t_fit2),polyval(ptem,ttem(t_fit1):0.1:ttem(t_fit2)),'-');
+It0 = polyval(ptem,ttem(t_z0));
+dptem = polyder(ptem);
+kt=polyval(dptem,ttem(t_z0));
+%kt=polyval(ptem,ttem(t_fit1+3))-polyval(ptem,ttem(t_fit1+1));
+ytem=e;
+%t_to_fit = [t_fit1:t_fit2];
+rsq = zeros(10,1);
+for i_fit = 4: 10
+t_fit1 = b+1;t_fit2 = b+i_fit;
+t_to_fit = [t_fit1:t_fit1+1,t_fit1+3:t_fit2];
+[ptem,~]=polyfit(ttem(t_to_fit),ytem(t_to_fit),o_fit);
+yfit =  ptem(1) * ttem(t_to_fit) + ptem(2);
+yresid = ytem(t_to_fit)-yfit;
+SSresid = sum(yresid.^2);
+SStotal = (length(ytem(t_to_fit))-1) * var(ytem(t_to_fit));
+rsq(i_fit) = 1 - SSresid/SStotal;
+end
+[~,i_opt] = max(rsq);
+t_fit1 = b+1;t_fit2 = b+i_opt;
+t_to_fit = [t_fit1:t_fit1+1,t_fit1+3:t_fit2];
+[ptem,~]=polyfit(ttem(t_to_fit),ytem(t_to_fit),o_fit);
+%plot(ttem(t_fit1:t_fit2),ytem(t_fit1:t_fit2),'*');hold on;plot(ttem(t_fit1):0.1:ttem(t_fit2),polyval(ptem,ttem(t_fit1):0.1:ttem(t_fit2)),'-');
+Ie0 = polyval(ptem,ttem(t_z0));
+dptem = polyder(ptem);
+ke=polyval(dptem,ttem(t_z0));
+%kt=polyval(ptem,ttem(t_fit1+3))-polyval(ptem,ttem(t_fit1+1));
 %-----------------------------------
 k=kt/ke;
 d = -kt/ke*Ie0+It0;
-
+%plot(k*e(6:end-4)+d,'-*');hold on;plot(t(6:end-4),'-*');
 DeltaZ = log((k*Ie+d)/It);
 sig = vpa(ones(1,n_var));
 for i_var = 1:n_var
@@ -172,59 +199,6 @@ for i=1:n_cond
         end
     end
 end
-%==========================================================================
-t1 = cell(n_cond,pm.num_clus);
-t2 = cell(n_cond,pm.num_clus);
-t3 = cell(n_cond,pm.num_clus);
-
-% for i=1:n_cond
-%     for ic = 1:4:pm.num_clus
-%         z_max{i,ic} = [];
-%         z_mean{i,ic} = [];
-%         for c = 1:n_coh(i,ic)
-%          it = (S.res{i,ic}.A_mean_t{c}(1,:) <= t_max{i,ic}(c)) & (S.res{i,ic}.A_mean_t{c}(1,:) > 1);
-%          ztem = z{i,ic}{c}(it);
-%          ttem = S.res{i,ic}.A_mean_t{c}(1,it);
-%          p = polyfit(ttem,ztem,5);
-%          k = polyder(polyder(p));
-%          l = (polyder(p));
-%          ytem = polyval(p,ttem);
-%          ytem1 = polyval(l,ttem);
-%          ytem2 = polyval(k,ttem);
-%          kappa = abs(ytem2)./(1+ytem1.^2).^1.5;
-%          kappa2_tem = [];
-%          for item = 2:max(size(ytem2))-1
-%              if (kappa(item-1) < kappa(item)) && (kappa(item+1) < kappa(item)) 
-%              t2{i,ic} = [t2{i,ic},ttem(item)];
-%              kappa2_tem = kappa(item);
-%              break;
-%              end
-%          end
-%          
-%          if ~isempty(kappa2_tem)
-%          for item = 1:max(size(ytem2))-1
-%              if (kappa(item) < kappa2_tem) && (kappa(item+1) > kappa2_tem)...
-%                      && (ytem2(item) > 0)
-%              t3{i,ic} = [t3{i,ic},ttem(item)];
-%              break;
-%              end
-%          end
-%          end
-%          
-%         end
-%          if (i==1) && (ic==1)
-%          figure(fig_exist{3}); 
-%          subplot(1,2,1);plot(ttem,ztem,'o');hold on;plot(ttem,ytem,'-');
-%          xlabel('t (s)'); ylabel('{\Delta}z/h'); legend({'{\Delta}z/h','Poly. Fit'},'Location','northwest');   
-%          legend('boxoff');
-%          subplot(1,2,2);plot(ttem,kappa,'-');
-%          xlabel('t (s)'); ylabel('\kappa (s^{-2})');
-%          legend({'\kappa'});
-%          legend('boxoff');
-%          legend('Location','northeast');
-%          end
-%     end
-% end
 %==========================================================================
 for i=1:1
     for ic = 1:2:pm.num_clus
@@ -286,7 +260,7 @@ for i=2:n_cond
 end
 figure(fig_exist{1}); hold on;
 %ylabel('{\Delta}z/h'); xlabel('t (s)'); 
-ylim([-0.2 0.7]); xlim([0 bound_s(end)-b]);
+ylim([-0.2 0.5]); xlim([0 bound_s(end)-b]);
 figure(fig_exist{2}); hold on;
 %ylabel('{\Delta}z/h'); xlabel('t (s)'); 
-ylim([-0.2 0.7]); xlim([0 bound_s(end)-b]);
+ylim([-0.2 0.5]); xlim([0 bound_s(end)-b]);

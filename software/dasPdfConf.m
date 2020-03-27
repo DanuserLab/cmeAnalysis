@@ -1,11 +1,8 @@
-function [fig_exist] = dasPdfConf(data, dir_alt, pm, con_name, DAS_stat, DAS_all, idx, varargin)
+function [fig_exist] = dasPdfConf(pm, DAS_stat, DAS_all, idx, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('data', @iscell);
-ip.addRequired('dir_alt', @(x) ischar(x));
 ip.addRequired('pm', @(x) isstruct(x));
-ip.addRequired('con_name', @(x) iscell(x));
 ip.addRequired('DAS_stat', @iscell);
 ip.addRequired('DAS_all', @iscell);
 ip.addRequired('idx', @iscell);
@@ -30,13 +27,11 @@ ip.addParameter('LT_not_Imax', true, @islogical);
 % along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
 % 
 % 
-ip.parse(data, dir_alt, pm, con_name,DAS_stat, DAS_all, idx, varargin{:});
+ip.parse(pm, DAS_stat, DAS_all, idx, varargin{:});
 %==========================================================================
-data = ip.Results.data;
 pm = ip.Results.pm;
-dir_alt=ip.Results.dir_alt;
-con_name = ip.Results.con_name;
-DAS_stat = ip.Results.DAS_stat;
+data = pm.data_all;
+con_name = pm.con_name;
 idx = ip.Results.idx;
 DAS_all = ip.Results.DAS_all;
 LT_not_Imax = ip.Results.LT_not_Imax;
@@ -55,7 +50,6 @@ fig_exist = cell(1, 2);
 fig_exist{1} = figure;
 fig_exist{2} = figure;
 %==========================================================================
-t0=1;
 LT = cell(num_condition, pm.num_clus);
 Imax = cell(num_condition, pm.num_clus);
 for i_condition=1:num_condition
@@ -77,9 +71,9 @@ end
 curvs = cell(num_condition,1);
 for i_condition = 1:num_condition
     if LT_not_Imax
-        [fig_pdf, fig_cdf] = plotPDFconf(LT{i_condition,1},LT{i_condition,3});
+        [fig_pdf] = plotPDFconf(LT{i_condition,1},LT{i_condition,3});
     else
-        [fig_pdf, fig_cdf] = plotPDFconf(Imax{i_condition,1},Imax{i_condition,3},'BoundedSupport', []);
+        [fig_pdf] = plotPDFconf(Imax{i_condition,1},Imax{i_condition,3},'BoundedSupport', []);
     end
 %-------------------------------------------------------------------------------
 axes_to_be_copied = findobj(fig_pdf{7},'type','axes');
@@ -90,7 +84,6 @@ curvs{i_condition} = [h(1).XData;h(1).YData;h(2).YData;h(3).YData;h(4).XData;h(4
 
 
 %-------------------------------------------------------------------------------
-close(fig_cdf{:})
 close(fig_pdf{:})
 end
 figure(fig_exist{1}); hold on;

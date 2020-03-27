@@ -1,13 +1,11 @@
 
 
-function [fig_exist] = dasCohorts(data, DAS_all, idx,dir_alt, pm, varargin)
+function [fig_exist] = dasCohorts(DAS_all, idx, pm, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('data', @iscell);
 ip.addRequired('DAS_all', @(x) iscell(x));
 ip.addRequired('idx', @(x) iscell(x));
-ip.addRequired('dir_alt', @(x) ischar(x));
 ip.addRequired('pm', @(x) isstruct(x));
 ip.addParameter('Overwrite', false, @islogical);
 ip.addParameter('ShowVariation', true, @islogical);
@@ -17,7 +15,7 @@ ip.addParameter('ShowBackground', false, @islogical);
 ip.addParameter('Rescale', true, @islogical);
 ip.addParameter('RescalingReference', 'med', @(x) any(strcmpi(x, {'max', 'med'})));
 ip.addParameter('ScaleSlaveChannel', false, @islogical);
-ip.addParameter('MaxIntensityThreshold', 0);
+ip.addParameter('MaxIntensityThreshold', [-inf inf]);
 ip.addParameter('ExcludeVisitors', true, @islogical);
 ip.addParameter('SlaveName', [], @iscell);
 ip.addParameter('ChannelNames', []);
@@ -65,15 +63,15 @@ ip.addParameter('master_adj', 0, @isnumeric);
 % along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
 % 
 % 
-ip.parse(data, DAS_all, idx, dir_alt, pm, varargin{:});
+ip.parse(DAS_all, idx, pm, varargin{:});
 %==========================================================================
-data = ip.Results.data;
 DAS_all = ip.Results.DAS_all;
 idx = ip.Results.idx;
-dir_alt = ip.Results.dir_alt;
 fig_exist = ip.Results.fig_exist;
 plot_visitor = pm.plot_visitor;
 pm = ip.Results.pm;
+data = pm.data_all;
+dir_alt = pm.dir_alt;
 MaxIntensityThreshold = ip.Results.MaxIntensityThreshold;
 master_adj = ip.Results.master_adj;
 num_clus = 3;
@@ -181,6 +179,7 @@ else
     res_c = [];
 end
 %==========================================================================
+id_parent = cell(num_condition,num_clus);
 for i_condition = 1:num_condition
     %-----------------------------------------------------------------------
     Track_info = S{i_condition}.Track_info;
@@ -203,9 +202,11 @@ for i_condition = 1:num_condition
         res{i_condition,i_c}.sbSigma_r = cell(n_movie,1);
         res{i_condition,i_c}.ebSigma_r = cell(n_movie,1);
     %----------------------------------------------------------------------
+    id_parent{i_condition,i_c} = cell(n_movie,1);
     for i_mov = 1:n_movie
         id_temp = (DAS_all{i_condition}.MovieNum == i_mov) & (idx{i_condition} == i_c)...
-                  & (DAS_all{i_condition}.MaxI > MaxIntensityThreshold);
+                  & (DAS_all{i_condition}.MaxI > MaxIntensityThreshold(1))& (DAS_all{i_condition}.MaxI < MaxIntensityThreshold(2));
+        id_parent{i_condition,i_c}{i_mov}= id_temp;
         res{i_condition,i_c}.A{i_mov} = Track_info{i_mov}.A(DAS_all{i_condition}.TrackID(id_temp),:);
         res{i_condition,i_c}.Sigma_r{i_mov} = Track_info{i_mov}.Sigma_r(DAS_all{i_condition}.TrackID(id_temp),:);
         res{i_condition,i_c}.LT{i_mov} = DAS_all{i_condition}.LT(id_temp);
@@ -243,9 +244,7 @@ for i_condition = 1:num_condition
         res_c{i_condition,i_c}.ebSigma_r = cell(n_movie,1);
     %----------------------------------------------------------------------
     for i_mov = 1:n_movie
-
-        id_temp = (DAS_all{i_condition}.MovieNum == i_mov) & (idx{i_condition} == i_c) ...
-                  & (DAS_all{i_condition}.MaxI > MaxIntensityThreshold);
+        id_temp = id_parent{i_condition,i_c}{i_mov};
         res_c{i_condition,i_c}.A{i_mov} = Track_info{i_mov}.A(DAS_all{i_condition}.TrackID(id_temp),:);
         res_c{i_condition,i_c}.Sigma_r{i_mov} = Track_info{i_mov}.Sigma_r(DAS_all{i_condition}.TrackID(id_temp),:);
         res_c{i_condition,i_c}.LT{i_mov} = DAS_all{i_condition}.LT(id_temp);
@@ -394,7 +393,7 @@ set(gca,'fontsize',8,'Linewidth',1,'Title',[],'FontName', 'Arial');
                 if ~pm.coh_buff 
                 xlim([0 cT{1}{end}(end-b+1)]);
                 end
-                ylim([10 70]);
+                ylim([0 70]);
             else
                 ha{i,1} = gca;
                 %xlabel('t (s)'); ylabel([pm.ch1_name ' Int. (a.u.)']); 
@@ -402,7 +401,7 @@ set(gca,'fontsize',8,'Linewidth',1,'Title',[],'FontName', 'Arial');
                 if ~pm.coh_buff 
                 xlim([0 cT{1}{end}(end-b+1)]);
                 end
-                ylim([10 70]);
+                ylim([0 70]);
                 ax1 = gca;
                 ha{i,2} = axes('Position',ax1.Position,'Linewidth',1,...
                             'XAxisLocation','bottom',...
@@ -414,7 +413,7 @@ set(gca,'fontsize',8,'Linewidth',1,'Title',[],'FontName', 'Arial');
                 if ~pm.coh_buff 
                 xlim([0 cT{1}{end}(end-b+1)]);
                 end
-                ylim([5 35]);
+                ylim([0 35]);
             end
             
             figure(fig_exist{i}); 

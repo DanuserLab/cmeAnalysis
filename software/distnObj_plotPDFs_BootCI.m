@@ -51,8 +51,11 @@ ip.addParameter('outputDir', fullfile(pwd, 'distnObj_PDFs_BootCI'));
 ip.addParameter('numBoots', 400)
 ip.addParameter('BoundedSupport', false);
 ip.addParameter('CommonBandWidth', NaN);
+ip.addParameter('trt_exist', true);
 ip.parse(varargin{:});
 p = ip.Results;
+
+trt_exist = ip.Results.trt_exist;
 
 if p.BoundedSupport == false
     PosSuppArg = {'Support', 'unbounded'};
@@ -64,8 +67,9 @@ end
 %%
 
 dat_ctrl.Properties.VariableNames = {varName, 'subjectID'};
+if trt_exist == true
 dat_trt.Properties.VariableNames = {varName, 'subjectID'};
-
+end
 
 %% boxplot for ctrl
 
@@ -79,7 +83,7 @@ ylabel(varName)
 title(ctlName)
 h = refline([0, median(dat_ctrl{:, 1})]);
 legend(h, 'Median of pooled data')
-
+if trt_exist == true
 % boxplot for trt
 figout{2} = figure;
 boxplot(dat_trt{:, 1}, dat_trt.subjectID)
@@ -89,16 +93,17 @@ ylabel(varName)
 title(trtName)
 h = refline([0, median(dat_trt{:, 1})]);
 legend(h, 'Median of pooled data')
-
+end
 
 %% cell format
 
-N1 = numel(unique(dat_ctrl.subjectID));
-N2 = numel(unique(dat_trt.subjectID));
+N1 = numel(unique(dat_ctrl.subjectID)); datCell_ctrl = cell(N1, 1);
+if trt_exist == true
+N2 = numel(unique(dat_trt.subjectID)); datCell_trt = cell(N2, 1);
+end
 
 
-datCell_ctrl = cell(N1, 1);
-datCell_trt = cell(N2, 1);
+
 
 idvec = sort(unique(dat_ctrl.subjectID));
 for k = 1:N1
@@ -106,14 +111,14 @@ for k = 1:N1
     ind0 = (dat_ctrl.subjectID == g);
     datCell_ctrl{k} = dat_ctrl{ind0, 1};
 end
-
+if trt_exist == true
 idvec = sort(unique(dat_trt.subjectID));
 for k = 1:N2
     g = idvec(k);
     ind0 = (dat_trt.subjectID == g);
     datCell_trt{k} = dat_trt{ind0, 1};
 end
-
+end
 
 
 %% pdf ctrl
@@ -147,7 +152,7 @@ title([varName, '-', ctlName])
 legend(num2str(idvec))
 
 %% pdf trt
-
+if trt_exist == true
 %xf = dat_trt.var;
 xf = balancedPooling(datCell_trt);
 
@@ -176,7 +181,7 @@ ylabel('Probability Density')
 title([varName, '-', trtName])
 
 legend(num2str(idvec))
-
+end
 
 %%
 %%  2. Bootstrap Confidence Interval of PDFs from movie-wise variation
@@ -201,14 +206,15 @@ disp(['bwctrl = ', num2str(bwctrl)])
 
 [fctrl, pdfgridBootMat_ctrl, pts_ctrl] = ...
     PDF_BootCI_balanced(datCell_ctrl, p.numBoots, bwctrl, ctlName, varName, PosSuppArg);
-
+if trt_exist == true
 [ftrt, pdfgridBootMat_trt, pts_trt] = ...
     PDF_BootCI_balanced(datCell_trt, p.numBoots, bwctrl, trtName, varName, PosSuppArg);
-
+end
 %
 figout{5} = fctrl;
+if trt_exist == true
 figout{6} = ftrt;
-
+end
 
 %% together
 figout{7} = figure;
@@ -221,7 +227,7 @@ ciuc = quantile(pdfgridBootMat_ctrl, 0.975);
 cilc = quantile(pdfgridBootMat_ctrl, 0.025);
 errbaru1 = ciuc-fc;
 errbarl1 = fc-cilc;
-
+if trt_exist == true
 %xtrt = cell2mat(datCell_trt);
 xtrt = balancedPooling(datCell_trt);
 [ft,ptst,bw0] = ksdensity(xtrt, pts_trt, 'Bandwidth', bwctrl, PosSuppArg{:});
@@ -230,22 +236,26 @@ ciut = quantile(pdfgridBootMat_trt, 0.975);
 cilt = quantile(pdfgridBootMat_trt, 0.025);
 errbaru2 = ciut-ft;
 errbarl2 = ft-cilt;
-
+end
 grid on
 hold on
 
 s1 = shadedErrorBarV2(ptsc, fc, [errbaru1; errbarl1], 'lineprops', '-b');
 s1.mainLine.LineWidth = 2; 
-
+if trt_exist == true
 s2 = shadedErrorBarV2(ptst, ft, [errbaru2; errbarl2], 'lineprops', '-r');
 s2.mainLine.LineWidth = 2; 
-
-
-legend([s1.mainLine s2.mainLine], ctlName, trtName, 'Location', 'northeast')
-
+end
+if trt_exist == true
+    legend([s1.mainLine s2.mainLine], ctlName, trtName, 'Location', 'northeast')
+    title([ctlName, ' vs. ', trtName, '. bandWidth: ', num2str(round(bwctrl,2))])
+else
+    legend(s1.mainLine , ctlName, 'Location', 'northeast')
+    title([ctlName, '. bandWidth: ', num2str(round(bwctrl,2))])
+end
 xlabel(varName)
 ylabel('Probability Density')
-title([ctlName, ' vs. ', trtName, '. bandWidth: ', num2str(round(bwctrl,2))])
+
 
 
 %%mobID
@@ -263,14 +273,15 @@ bwctrl = bwctrl0 * 0.5
 
 [fctrl, pdfgridBootMat_ctrl, pts_ctrl] = ...
     PDF_BootCI_balanced(datCell_ctrl, p.numBoots, bwctrl, ctlName, varName, PosSuppArg);
-
+if trt_exist == true
 [ftrt, pdfgridBootMat_trt, pts_trt] = ...
     PDF_BootCI_balanced(datCell_trt, p.numBoots, bwctrl, trtName, varName, PosSuppArg);
-
+end
 %
 figout{8} = fctrl;
+if trt_exist == true
 figout{9} = ftrt;
-
+end
 
 %% together
 figout{10} = figure;
@@ -283,7 +294,7 @@ ciuc = quantile(pdfgridBootMat_ctrl, 0.975);
 cilc = quantile(pdfgridBootMat_ctrl, 0.025);
 errbaru1 = ciuc-fc;
 errbarl1 = fc-cilc;
-
+if trt_exist == true
 %xtrt = cell2mat(datCell_trt);
 xtrt = balancedPooling(datCell_trt);
 [ft,ptst,bw0] = ksdensity(xtrt, pts_trt, 'Bandwidth', bwctrl, PosSuppArg{:});
@@ -292,23 +303,28 @@ ciut = quantile(pdfgridBootMat_trt, 0.975);
 cilt = quantile(pdfgridBootMat_trt, 0.025);
 errbaru2 = ciut-ft;
 errbarl2 = ft-cilt;
-
+end
 grid on
 hold on
 
 s1 = shadedErrorBarV2(ptsc, fc, [errbaru1; errbarl1], 'lineprops', '-b');
 s1.mainLine.LineWidth = 2; 
-
+if trt_exist == true
 s2 = shadedErrorBarV2(ptst, ft, [errbaru2; errbarl2], 'lineprops', '-r');
 s2.mainLine.LineWidth = 2; 
-
-
+end
+if trt_exist == true
 legend([s1.mainLine s2.mainLine], ctlName, trtName, 'Location', 'northeast')
-
+else
+    legend(s1.mainLine , ctlName, 'Location', 'northeast')
+end
 xlabel(varName)
 ylabel('Probability Density')
+if trt_exist == true
 title([ctlName, ' vs. ', trtName, '. bandWidth: ', num2str(round(bwctrl,2))])
-
+else
+    title([ctlName, '. bandWidth: ', num2str(round(bwctrl,2))])
+end
 
 
 %% bw = bw0*2
@@ -325,14 +341,15 @@ bwctrl = bwctrl0 * 2
 
 [fctrl, pdfgridBootMat_ctrl, pts_ctrl] = ...
     PDF_BootCI_balanced(datCell_ctrl, p.numBoots, bwctrl, ctlName, varName, PosSuppArg);
-
+if trt_exist == true
 [ftrt, pdfgridBootMat_trt, pts_trt] = ...
     PDF_BootCI_balanced(datCell_trt, p.numBoots, bwctrl, trtName, varName, PosSuppArg);
-
+end
 %
 figout{11} = fctrl;
+if trt_exist == true
 figout{12} = ftrt;
-
+end
 
 %% together
 figout{13} = figure;
@@ -345,7 +362,7 @@ ciuc = quantile(pdfgridBootMat_ctrl, 0.975);
 cilc = quantile(pdfgridBootMat_ctrl, 0.025);
 errbaru1 = ciuc-fc;
 errbarl1 = fc-cilc;
-
+if trt_exist == true
 %xtrt = cell2mat(datCell_trt);
 xtrt = balancedPooling(datCell_trt);
 [ft,ptst,bw0] = ksdensity(xtrt, pts_trt, 'Bandwidth', bwctrl, PosSuppArg{:});
@@ -354,23 +371,28 @@ ciut = quantile(pdfgridBootMat_trt, 0.975);
 cilt = quantile(pdfgridBootMat_trt, 0.025);
 errbaru2 = ciut-ft;
 errbarl2 = ft-cilt;
-
+end
 grid on
 hold on
 
 s1 = shadedErrorBarV2(ptsc, fc, [errbaru1; errbarl1], 'lineprops', '-b');
 s1.mainLine.LineWidth = 2; 
-
+if trt_exist == true
 s2 = shadedErrorBarV2(ptst, ft, [errbaru2; errbarl2], 'lineprops', '-r');
 s2.mainLine.LineWidth = 2; 
-
-
+end
+if trt_exist == true
 legend([s1.mainLine s2.mainLine], ctlName, trtName, 'Location', 'northeast')
-
+else
+    legend(s1.mainLine, ctlName, 'Location', 'northeast')
+end
 xlabel(varName)
 ylabel('Probability Density')
+if trt_exist == true
 title([ctlName, ' vs. ', trtName, '. bandWidth: ', num2str(round(bwctrl,2))])
-
+else
+    title([ctlName, '. bandWidth: ', num2str(round(bwctrl,2))])
+end
 
 %% saveas
 

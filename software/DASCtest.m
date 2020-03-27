@@ -1,5 +1,5 @@
 % MATLAB-based testing/performance suite for DASC test (part of cmeAnalysis)
-% Qiongjing (Jenny) Zou, Oct 2019
+% Qiongjing (Jenny) Zou, March 2020
 % Test DASC test
 %
 % Copyright (C) 2020, Danuser Lab - UTSouthwestern 
@@ -43,47 +43,61 @@ disp('Starting DASC test script');
 
 %----Initialization of temp dir
 
-package_name = 'cmeAnalysis';
+package_name = 'cmeAnalysisDASC';
 t_stamp = datestr(now,'ddmmmyyyyHHMMSS');
 tmpdir = fullfile(tempdir, [package_name '_test_' t_stamp]);
 mkdir(tmpdir);
 
-% -------------------------
+% ----Gather testing data set
 
-small_data_set = true
+data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/DASC_auto_test_lite'
+tic;
+disp(['Copying ' data_root 'to ' tmpdir]);
+copyfile(data_root, [tmpdir filesep 'DASC_auto_test_lite']);
+disp('Done copying')
+toc
 
-if small_data_set
-    disp('Running on truncated data set - small');
-    data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/DASC_test/mini_test'
-    tic;
-    disp(['Copying ' data_root 'to ' tmpdir]);
-    copyfile(data_root, [tmpdir filesep 'mini_test']);
-    disp('Done copying')
-    toc
-    matPath = fullfile(tmpdir, 'mini_test', 'test_input.mat');
-else
-    disp('Running on large data set - may take some time...');
-    data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/DASC_test'
-    disp('Will not copy data to tmpdir, since data is too big...');
-    matPath = fullfile(data_root, 'test_input.mat');
-end
+dir_master = [tmpdir filesep 'DASC_auto_test_lite'];
 
-% data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/DASC_test_wTiffs'
-% data_path1 = fullfile(data_root, 'control');
-% data_all{1} = loadConditionData(data_path1, {''}, {'eGFP'});
-% data_path2 = fullfile(data_root, 'siCALM');
-% data_all{2} = loadConditionData(data_path2, {''}, {'eGFP'});
-load(matPath);
-dir_alt = fullfile(tmpdir, 'Analysis');
-mkdir(dir_alt)
-con_name = {'siControl','siCALM'};
-pm = dasParameter(size(con_name,2),dir_alt);
+% Analysis Output Directory
+saveFolder = fullfile(tmpdir, 'Analysis');
+mkdir(saveFolder)
 
 %% run DASC test script
-tic
-wrapper() % this a test script for this DASC test
-toc
-close all
+% adapted from test_wrapper.m by Xinxin Wang with some modifications, corrected typo "muilti" to "multi".
+
+dasMuiltiCondition('dir_movie',[dir_master filesep 'multi_condition/data'],'dir_DAS',[saveFolder filesep 'multi_condition/result'])
+dasPoolingBootstrap([saveFolder filesep 'multi_condition/result'],'I_sub_samp',0.1,'N_samp',5,'N_bs', 1)
+
+%
+data_all{1} = loadConditionData([dir_master filesep 'EpiTirf' filesep 'control'], {'TIRF','WT'}, {'egfp','egfp'});
+con_name = {'control'};
+dir_alt = [saveFolder filesep 'EpiTirf' filesep 'result'];
+mkdir(dir_alt)
+pm = dasParameter('data_all',data_all,'dir_alt',dir_alt,'con_name',con_name,...
+                  'save_image',false,...
+    'plot_fig1', false,'overwriteTrack_info',false,...
+    'scheme_p',1,'plot_EpiTIRF',true,'cohort_norm', true,...
+    'pdf_conf', false, 'PaperPosition', [0 0 5 5],...
+    'plot_visitor',true,'cohort_diff',false,'fig1_mosaic',false,'plot_cohort',true,'fig_disp_mod','single');
+dasSingleCondition(pm);
+close all;
+%
+data_all = cell(2,1);
+data_all{1} = loadConditionData([dir_master '/multi_condition/data/siControl/190413'], {''}, {'egfp'});
+data_all{2} = loadConditionData([dir_master '/multi_condition/data/siCALM/190413'], {''}, {'egfp'});
+con_name = {'siControl','siCALM'};
+dir_alt = [saveFolder filesep 'multi_condition' filesep 'result'];
+mkdir(dir_alt);
+pm = dasParameter('data_all',data_all,'dir_alt',dir_alt,'con_name',con_name,...
+                  'save_image',true,...
+    'plot_fig1', true,'overwriteTrack_info',false,...
+    'scheme_p',1,'plot_EpiTIRF',false,'cohort_norm', true,...
+    'pdf_conf', true, 'PaperPosition', [0 0 5 5],...
+    'plot_visitor',true,'cohort_diff',false,'fig1_mosaic',false,'plot_cohort',false,'fig_disp_mod','single');
+dasSingleCondition(pm);
+close all;
+
 disp('Finished DASC test script');
 
 %% Clean up tmpdir
@@ -99,7 +113,3 @@ assert(~(exist(tmpdir, 'dir') == 7))
 disp('*****************************************');
 disp('%% !!!!!!!done cleaning up /tmp/ ');
 disp('*****************************************');
-
-
-
-

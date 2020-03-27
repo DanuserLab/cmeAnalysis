@@ -1,20 +1,13 @@
-
-
 function [idx, Cx] = dasCluster(DAS_all, pm, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
 ip.addRequired('DAS_all', @(x) iscell(x));
 ip.addRequired('pm', @(x) isstruct(x));
-ip.addParameter('correct13', false, @islogical);
-ip.addParameter('correct13_GM', false, @islogical);
 ip.parse(DAS_all, pm, varargin{:});
 
-
 DAS_all = ip.Results.DAS_all;
-correct13 = ip.Results.correct13;
 num_condition = max(size(DAS_all));
-correct13_GM = ip.Results.correct13_GM;
 pm = ip.Results.pm;
 %==========================================================================
 %
@@ -41,6 +34,9 @@ Cx = cell(num_condition,1);
 num_clus = 3;
 %==========================================================================
 disp('clustering ...')
+if pm.dist_perct > 0
+    Z_norm_save = cell(num_condition,1);
+end
 for i_condition = 1:num_condition
     X = DAS_all{i_condition}.DAS_var;
     Y = DAS_all{i_condition}.DAS;
@@ -53,11 +49,8 @@ for i_condition = 1:num_condition
     
     if (i_condition == 1)
         Z_norm=[normalize(X,'zscore'),normalize(Y,'zscore'),normalize(Z,'zscore')];
-        [idx{i_condition},Cx{i_condition}] = kmeans(Z_norm,num_clus,'Start','sample','Options',statset('MaxIter',10000),'Replicates',10);
-    elseif (i_condition > 1) && (pm.kmeans_ctrl_only == false)
-        Z_norm=[normalize(X,'zscore'),normalize(Y,'zscore'),normalize(Z,'zscore')];
-        [idx{i_condition},Cx{i_condition}] = kmeans(Z_norm,num_clus,'Start','sample','Options',statset('MaxIter',10000),'Replicates',10);
-    elseif (i_condition > 1) && (pm.kmeans_ctrl_only == true)
+        [idx{i_condition},Cx{i_condition}] = kmedoids(Z_norm,num_clus,'Start','sample','Options',statset('MaxIter',10000),'Replicates',10);
+    elseif (i_condition > 1) 
         dist_C = zeros(max(size(DAS_all{i_condition}.DAS)),num_clus);
         Z_norm=[(X-mu(1))/sigma(1),(Y-mu(2))/sigma(2),(Z-mu(3))/sigma(3)];
         for i_c = 1:num_clus
@@ -74,19 +67,27 @@ for i_condition = 1:num_condition
 %         [~,idx{i_condition}] = min(dist_C,[],2);
 %           Cx{i_condition} = Cx{1};
     end
+    Z_norm_save{i_condition} = Z_norm;
     %[idx{i_condition},Cx{i_condition}] = kmeans(Z_norm,num_clus,'Start','sample','Options',statset('MaxIter',10000),'Replicates',10);
     %----------------------------------------------------
-     i_ccp = ones(num_clus,1)*2;
-     LT_mean = zeros(num_clus,1);
+    %fprintf('condition# %4.0f finished \n',i_condition)
+end
+for i_condition = 1:num_condition
+     if (i_condition == 1) 
+     i_ccp = ones(num_clus,1)*1;
+     %LT_mean = zeros(num_clus,1);
      Imax_mean = zeros(num_clus,1);
+     DAS_mean = zeros(num_clus,1);
      for i_c = 1:num_clus
-      LT_mean(i_c) = mode(DAS_all{i_condition}.LT(idx{i_condition}==i_c));
-      Imax_mean(i_c) = mean(DAS_all{i_condition}.MaxI(idx{i_condition}==i_c));
+      %LT_mean(i_c) = median(DAS_all{i_condition}.LT(idx{i_condition}==i_c));
+      Imax_mean(i_c) = median(DAS_all{i_condition}.MaxI(idx{i_condition}==i_c));
+      DAS_mean(i_c) = median(DAS_all{i_condition}.DAS(idx{i_condition}==i_c));
      end
-     [~,i_LT_mean_max] = max(LT_mean);
      [~,i_Imax_mean_min] = min(Imax_mean);
-      i_ccp(i_LT_mean_max) = 1;
+     [~,DAS_mean_max] = max(DAS_mean);
       i_ccp(i_Imax_mean_min) = 3;
+      i_ccp(DAS_mean_max) = 2;
+     end
   %-----------------------------------------
   Cx_temp = Cx{i_condition};
   id_temp = cell(num_clus,1);
@@ -98,33 +99,48 @@ for i_condition = 1:num_condition
       Cx{i_condition}(i_ccp(i_c),:) = Cx_temp(i_c,:);
   end
   %-----------------------------------------
-  if correct13 == true
-   if (i_condition == 1) || (pm.kmeans_ctrl_only == false)
-   id_temp = (idx{i_condition} == 1) | (idx{i_condition} == 3);
-   Z_norm=[normalize(X(id_temp),'zscore'),normalize(Y(id_temp),'zscore')];
-   if correct13_GM == false
-   [idx_temp,C_temp] = kmedoids(Z_norm,2,'Start','sample','Options',statset('MaxIter',10000),'Replicates',10);
-   else
-   GMM = fitgmdist(Z_norm,2,'Options',statset('Display','final','MaxIter',1000),'Replicates',10,'Start','randSample');
-   idx_temp = cluster(GMM,Z_norm);
-   end
-   if mean(Z_norm(idx_temp==1,2)) > mean(Z_norm(idx_temp==2,2))
-       idx_temp(idx_temp == 2) = 3;
-       idx{i_condition}(id_temp) = idx_temp;
-   else
-       idx_temp = idx_temp-1;
-       idx_temp(idx_temp == 0) = 3;
-       idx{i_condition}(id_temp) = idx_temp;
-       C_temp_store = C_temp;
-       C_temp(1,:) = C_temp_store(2,:);
-       C_temp(2,:) = C_temp_store(1,:);
-   end
-   Cx{i_condition}(1,:) = C_temp(1,:);
-   Cx{i_condition}(3,:) = C_temp(2,:);
-   end
-  end
-  %-----------------------------------------
-    fprintf('condition# %4.0f finished \n',i_condition)
+end
+
+if pm.correct13 == true
+    for i_condition = 1:num_condition
+        idx_tem = idx{i_condition};
+        idx{i_condition}(idx_tem == 1) = 3;
+        idx{i_condition}(idx_tem == 3) = 1;
+        Cx_tem = Cx{i_condition};
+        Cx{i_condition}(1,:) = Cx_tem(3,:);
+        Cx{i_condition}(3,:) = Cx_tem(1,:);
+    end
+elseif pm.correct12 == true
+    for i_condition = 1:num_condition
+        idx_tem = idx{i_condition};
+        idx{i_condition}(idx_tem == 1) = 2;
+        idx{i_condition}(idx_tem == 2) = 1;
+        Cx_tem = Cx{i_condition};
+        Cx{i_condition}(1,:) = Cx_tem(2,:);
+        Cx{i_condition}(2,:) = Cx_tem(1,:);
+    end
+elseif pm.correct23 == true
+     for i_condition = 1:num_condition
+        idx_tem = idx{i_condition};
+        idx{i_condition}(idx_tem == 2) = 3;
+        idx{i_condition}(idx_tem == 3) = 2;
+        Cx_tem = Cx{i_condition};
+        Cx{i_condition}(2,:) = Cx_tem(3,:);
+        Cx{i_condition}(3,:) = Cx_tem(2,:);
+    end
+end
+if pm.dist_perct > 0
+    for i_condition = 1:num_condition
+       dist_C = zeros(max(size(DAS_all{i_condition}.DAS)),num_clus);
+        for i_c = 1:num_clus
+         dist_C(:,i_c) = sum((Z_norm_save{i_condition}-Cx{i_condition}(i_c,:)).*(Z_norm_save{i_condition}-Cx{i_condition}(i_c,:)),2);
+        end
+    dist_C_diff = abs(dist_C(:,1) - dist_C(:,3));
+    dist_C_diff_thre = prctile(dist_C_diff((idx{i_condition}==1)|(idx{i_condition}==3)),pm.dist_perct);
+    id_um = false(size(idx{i_condition}));
+    id_um(((idx{i_condition}==1)|(idx{i_condition}==3))&(dist_C_diff<dist_C_diff_thre)) = true;
+    idx{i_condition}(id_um) = 0;
+    end
 end
 
 

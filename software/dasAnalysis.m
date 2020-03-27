@@ -1,12 +1,10 @@
 
 
-function [DAS_all, DAS_Cluster] = dasAnalysis(data, pm, alt_dir, varargin)
+function [DAS_all] = dasAnalysis(pm, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('data', @(x) iscell(x));
 ip.addRequired('pm', @(x) isstruct(x));
-ip.addRequired('alt_dir', @(x) ischar(x));
 ip.addParameter('A_max_all', 300, @isnumeric);
 ip.addParameter('RandSampling', false, @islogical);
 ip.addParameter('bin_A', 1, @isnumeric);
@@ -19,7 +17,7 @@ ip.addParameter('calculate_factor', false, @islogical);
 ip.addParameter('example', false, @islogical);
 ip.addParameter('data_ratio', 1, @isnumeric);
 ip.addParameter('Bandwidth', 0.05, @isnumeric);
-ip.parse(data, pm, alt_dir, varargin{:});
+ip.parse(pm, varargin{:});
 %==================================================
 %
 % Copyright (C) 2020, Danuser Lab - UTSouthwestern 
@@ -42,12 +40,12 @@ ip.parse(data, pm, alt_dir, varargin{:});
 % 
 A_max_all = ip.Results.A_max_all;
 pm = ip.Results.pm;
+data = pm.data_all;
+alt_dir = pm.dir_alt;
 
 bin_A = ip.Results.bin_A;
-condition_name = ip.Results.condition_name;
 Category = ip.Results.Category;
-alt_dir = ip.Results.alt_dir;
-data = ip.Results.data;
+
 RandSampling = ip.Results.RandSampling;
 num_condition = max(size(data));
 n_ch = size(data{1}(1).channels,2);
@@ -102,9 +100,11 @@ for i_condition = 1:num_condition
     save([file_path filesep 'Track_info.mat'],'Track_info','-v7.3');
     Track_info_all{i_condition} = Track_info;
     clear Track_info;
+    if n_ch > 1
     [Track_info_child] = dasReadChild(data{i_condition},master_dir{i_condition}, 'Category', Category);   
     save([file_path filesep 'Track_info_child.mat'],'Track_info_child','-v7.3');
     clear Track_info_child;
+    end
     else
     S = load([file_path filesep 'Track_info.mat']);
     Track_info_all{i_condition} = S.Track_info;
