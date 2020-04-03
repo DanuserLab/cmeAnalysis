@@ -49,24 +49,30 @@ tmpdir = fullfile(tempdir, [package_name '_test_' t_stamp]);
 mkdir(tmpdir);
 
 % ----Gather testing data set
-
-data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/DASC_auto_test_lite'
-tic;
-disp(['Copying ' data_root 'to ' tmpdir]);
-copyfile(data_root, [tmpdir filesep 'DASC_auto_test_lite']);
-disp('Done copying')
-toc
-
-dir_master = [tmpdir filesep 'DASC_auto_test_lite'];
+local_test = false;
+if local_test
+    data_root = 'C:\Users\Jenny\Documents\Data';
+    dir_master = [data_root filesep 'DASC_auto_test_lite'];
+else
+    data_root = '/project/bioinformatics/Danuser_lab/danuser_ci/Data/DASC_auto_test_lite';
+    tic;
+    disp(['Copying ' data_root 'to ' tmpdir]);
+    copyfile(data_root, [tmpdir filesep 'DASC_auto_test_lite']);
+    disp('Done copying')
+    toc
+    
+    dir_master = [tmpdir filesep 'DASC_auto_test_lite'];
+end
 
 % Analysis Output Directory
 saveFolder = fullfile(tmpdir, 'Analysis');
 mkdir(saveFolder)
+mkdir([saveFolder filesep 'multi_condition/result']);
 
 %% run DASC test script
-% adapted from test_wrapper.m by Xinxin Wang with some modifications, corrected typo "muilti" to "multi".
+% adapted from test_wrapper.m by Xinxin Wang with some modifications.
 
-dasMuiltiCondition('dir_movie',[dir_master filesep 'multi_condition/data'],'dir_DAS',[saveFolder filesep 'multi_condition/result'])
+dasMuiltiCondition('dir_movie',[dir_master filesep 'muilti_condition/data'],'dir_DAS',[saveFolder filesep 'multi_condition/result'])
 dasPoolingBootstrap([saveFolder filesep 'multi_condition/result'],'I_sub_samp',0.1,'N_samp',5,'N_bs', 1)
 
 %
@@ -84,8 +90,8 @@ dasSingleCondition(pm);
 close all;
 %
 data_all = cell(2,1);
-data_all{1} = loadConditionData([dir_master '/multi_condition/data/siControl/190413'], {''}, {'egfp'});
-data_all{2} = loadConditionData([dir_master '/multi_condition/data/siCALM/190413'], {''}, {'egfp'});
+data_all{1} = loadConditionData([dir_master '/muilti_condition/data/siControl/190413'], {''}, {'egfp'});
+data_all{2} = loadConditionData([dir_master '/muilti_condition/data/siCALM/190413'], {''}, {'egfp'});
 con_name = {'siControl','siCALM'};
 dir_alt = [saveFolder filesep 'multi_condition' filesep 'result'];
 mkdir(dir_alt);
