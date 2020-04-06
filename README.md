@@ -11,6 +11,15 @@ Release notes: includes improvements to graphical and console output.
 For more information, please see [Aguet et al., Dev. Cell 26(3), pp. 279-291, 2013.](http://www.cell.com/developmental-cell/abstract/S1534-5807(13)00382-1)
 
 ----------------------
+“Disassembly asymmetry score classification” (DASC), is based on the new method developed in the article, “DASC, a sensitive classifier for measuring discrete early stages in clathrin-mediated endocytosis”, by Wang X. et. al. 2020. 
+DASC is built upon and embedded in cmeAnalysis.
+
+  - [Test data set for DASC (53 GB)](https://cloud.biohpc.swmed.edu/index.php/s/DASC_data)
+
+For more information, please read the [User Guide]().
+
+
+----------------------
 [Danuser Lab Website](https://www.utsouthwestern.edu/labs/danuser/)
 
 [Software Links](https://www.utsouthwestern.edu/labs/danuser/software/)
