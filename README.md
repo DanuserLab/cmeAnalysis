@@ -16,7 +16,7 @@ DASC is built upon and embedded in cmeAnalysis.
 
   - [Test data set for DASC (53 GB)](https://cloud.biohpc.swmed.edu/index.php/s/DASC_data)
 
-For more information, please read the [User Guide]().
+For more information, please read the [User Guide](https://github.com/DanuserLab/cmeAnalysis/blob/master/software/doc/DASC_instruction.pdf).
 
 
 ----------------------
