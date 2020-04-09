@@ -43,7 +43,14 @@ for i_g = 1: n_g
     n_f = max(size(figH{i_g}));
     for i_f = 1: n_f
         figure(figH{i_g}(i_f));
+        if strcmp(get(figH{i_g}(i_f),'WindowStyle'),'docked') == true
+            docked = true;
+        else
+            docked = false;
+        end
+      if docked == true
       set(figH{i_g}(i_f),'WindowStyle','normal');
+      end
 %       gca_all = get(gcf,'Children');
 %       for i_gca = 1: max(size(gca_all))
 %           set(gca(i_gca),'fontsize',8,'Linewidth',1,'Title',[],'FontName', 'Arial');
@@ -63,7 +70,9 @@ for i_g = 1: n_g
       figH{i_g}(i_f).PaperUnits = 'centimeters';
       figH{i_g}(i_f).PaperPosition = PaperPosition;
 	  print(figH{i_g}(i_f),[dir_temp filesep 'fig_' num2str(i_fig) '_g_' num2str(i_g) '_no_' num2str(i_f)],'-dpng','-r900')
+      if docked == true
       set(figH{i_g}(i_f),'WindowStyle','docked');
+      end
       savefig(figH{i_g}(i_f),[dir_temp filesep 'fig_' num2str(i_fig) '_g_' num2str(i_g) '_no_' num2str(i_f)])
     end
 
