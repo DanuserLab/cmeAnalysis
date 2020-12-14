@@ -1,7 +1,7 @@
 function [trackedFeatureIndx,trackedFeatureInfo,kalmanFilterInfo,...
-    nnDistFeatures,prevCost,errFlag,trackabilityData] = linkFeaturesKalmanSparse(movieInfo,...
+    nnDistFeatures,prevCost,errFlag] = linkFeaturesKalmanSparse(movieInfo,...
     costMatFunc,costMatParam,kalmanFunctions,probDim,filterInfoPrev,...
-    prevCost,verbose,varargin)
+    prevCost,verbose)
 %LINKFEATURESKALMAN links features between consecutive frames using LAP and possibly motion propagation using the Kalman filter
 %
 %SYNOPSIS [trackedFeatureIndx,trackedFeatureInfo,kalmanFilterInfo,...
@@ -92,7 +92,8 @@ function [trackedFeatureIndx,trackedFeatureInfo,kalmanFilterInfo,...
 % and Brian Devree from Copenhagen University to reduce the tracking time.
 % Changes made in this function are modified the code to pass the function named 
 % "costMatRandomDirectedSwitchingMotionLink" as a handle, instead of calling it through 
-% an eval statement. Writing to force UNIX encoding. 
+% an eval statement. This is note is to force enconding change (otherwise not detected
+% by git)
 %
 % Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
@@ -178,16 +179,6 @@ if errFlag
     disp('--linkFeaturesKalmanSparse: Please fix input parameters.');
     return
 end
-
-% To discuss: I propose to add new param through varargin to reduce 
-ip = inputParser;
-ip.CaseSensitive = false;
-ip.KeepUnmatched = true;
-ip.addParameter('estimateTrackability',false);
-ip.parse(varargin{:});
-p=ip.Results;
-
-
 
 %% preamble
 
@@ -336,13 +327,6 @@ if verbose
     progressText(0,'Linking frame-to-frame');
 end
 
-%% To join in trackabilityData
-samplesDetections(length(movieInfo))=Detections();
-trackabilityCost=cell(1,length(movieInfo));
-samplingLabel=cell(1,length(movieInfo));
-votingLabel=cell(1,length(movieInfo));
-trackabilityCostFull=cell(1,length(movieInfo));
-predExpectation(length(movieInfo))=Detections();
 %go over all frames
 for iFrame = 1 : numFrames-1
 
@@ -355,23 +339,6 @@ for iFrame = 1 : numFrames-1
         if numFeaturesFrame2 ~= 0 %if there are features in 2nd frame
             
             %calculate cost matrix
-            if(p.estimateTrackability)
-                %% Summarizing dynamic parameter for readability
-                dynCostMatParam.movieInfo=movieInfo;
-                dynCostMatParam.iFrame=iFrame;
-                dynCostMatParam.prevCostStruct=prevCostStruct;
-                dynCostMatParam.probDim=probDim;
-                dynCostMatParam.nnDistFeatures=nnDistFeatures(1:numFeaturesFrame1,:);
-                dynCostMatParam.movieInfo=movieInfo;
-                dynCostMatParam.featLifetime=featLifetime;
-                dynCostMatParam.trackedFeatureIndx=trackedFeatureIndx;
-
-                [trackabilityCost{iFrame+1}, ...
-                    samplesDetections(iFrame+1),samplingLabel{iFrame+1},votingLabel{iFrame+1}, ... 
-                    trackabilityCostFull{iFrame+1},predExpectation(iFrame+1)]= ...
-                    simulatedPredictionVoting(kalmanFilterInfo(iFrame),costMatFunc,costMatParam,dynCostMatParam);
-
-            end
             % -- USER DEFINED FUNCTION -- %
             % eval(['[costMat,propagationScheme,kalmanFilterInfoTmp,nonlinkMarker]'...
             %     ' = ' costMatName '(movieInfo,kalmanFilterInfo(iFrame),'...
@@ -652,21 +619,6 @@ for iFrame = 1 : numFrames-1
     end
     
 end %(for iFrame=1:numFrames-1)
-
-lastFrameDet=Detections(movieInfo(end));
-% samplesDetections(end)=Detections(movieInfo(end));
-% trackabilityCost{end}=ones(lastFrameDet.getCard(),1);
-% trackabilityCostFull{end}=zeros(lastFrameDet.getCard(),3);
-% samplingLabel{end}=ones(lastFrameDet.getCard(),1);
-% votingLabel{end}=ones(lastFrameDet.getCard(),1);
-
-trackabilityData.samplesDetections=samplesDetections;
-trackabilityData.trackabilityCost=trackabilityCost;
-trackabilityData.trackabilityCostFull=trackabilityCostFull;
-trackabilityData.samplingLabel=samplingLabel;
-trackabilityData.votingLabel=votingLabel;
-trackabilityData.predExpectation=predExpectation;
-
 
 %add information from last frame to auxiliary matrices
 numRows = size(trackedFeatureIndx,1);
