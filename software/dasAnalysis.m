@@ -38,6 +38,25 @@ ip.parse(pm, varargin{:});
 % along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
 % 
 % 
+%
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
+%
+% This file is part of CMEAnalysis_Package.
+% 
+% CMEAnalysis_Package is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% CMEAnalysis_Package is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
+% 
+% 
 A_max_all = ip.Results.A_max_all;
 pm = ip.Results.pm;
 data = pm.data_all;
@@ -177,6 +196,9 @@ if (pm.overwriteDAS == true) || (DAS_done == false)
     end
     end
     %---------------------------------
+    if pm.RAMsave == true
+        clear Track_info_all;
+    end
 for i_condition = 1:num_condition
     %---------------------------------
     if calibrate == true 
@@ -188,13 +210,33 @@ for i_condition = 1:num_condition
             factor_temp = factor_given;
         end
     end
+    if pm.RAMsave == true
+    if i_condition == 1
+        file_path_tem = master_dir{i_condition};
+        S = load([file_path_tem filesep 'Track_info.mat']);
+        [Dfunc,~, ~, ~] = dasComputeD(data{i_condition}, S.Track_info, [1 0], pm, A_max_all, 'bin_A', bin_A, 'data_ratio', data_ratio);
+    elseif (i_condition > 1) && (pm.recalculateD == true)
+        file_path_tem = master_dir{i_condition};
+        S = load([file_path_tem filesep 'Track_info.mat']);
+        [Dfunc,~, ~, ~] = dasComputeD(data{i_condition}, S.Track_info, [1 0], pm, A_max_all, 'bin_A', bin_A, 'data_ratio', data_ratio);
+    end
+    else
     if i_condition == 1
         [Dfunc,~, ~, ~] = dasComputeD(data{i_condition}, Track_info_all{i_condition}, [1 0], pm, A_max_all, 'bin_A', bin_A, 'data_ratio', data_ratio);
     elseif (i_condition > 1) && (pm.recalculateD == true)
         [Dfunc,~, ~, ~] = dasComputeD(data{i_condition}, Track_info_all{i_condition}, [1 0], pm, A_max_all, 'bin_A', bin_A, 'data_ratio', data_ratio);
     end
-
-    DAS_all{i_condition} = dasComputeDas(data{i_condition}, Track_info_all{i_condition}, DAS_all{i_condition}, Dfunc, factor_temp, A_max_all, 'bin_A', bin_A);
+    end
+    if pm.RAMsave == true
+        file_path_tem = master_dir{i_condition};
+        S = load([file_path_tem filesep 'Track_info.mat']);
+        DAS_all{i_condition} = dasComputeDas(data{i_condition}, S.Track_info, DAS_all{i_condition}, Dfunc, factor_temp, A_max_all, 'bin_A', bin_A);
+    else
+        DAS_all{i_condition} = dasComputeDas(data{i_condition}, Track_info_all{i_condition}, DAS_all{i_condition}, Dfunc, factor_temp, A_max_all, 'bin_A', bin_A);
+    end
+    if pm.RAMsave == true
+        clear S;
+    end
     cd(master_dir{i_condition});
     %---------------------------------
 end

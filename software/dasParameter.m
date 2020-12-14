@@ -40,12 +40,33 @@ ip.addParameter('fig_disp_mod','default',@ischar); %disable group figure: 'singl
 ip.addParameter('correct13',false,@islogical);
 ip.addParameter('correct12',false,@islogical);
 ip.addParameter('correct23',false,@islogical);
+ip.addParameter('clus_thre',false,@islogical);
+ip.addParameter('RAMsave',true,@islogical);
 ip.parse(varargin{:});
 
 data_all = ip.Results.data_all;
 con_name = ip.Results.con_name;
 dir_alt = ip.Results.dir_alt;
 %================================================================================
+%
+% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
+%
+% This file is part of CMEAnalysis_Package.
+% 
+% CMEAnalysis_Package is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% CMEAnalysis_Package is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
+% 
+% 
 %
 % Copyright (C) 2020, Danuser Lab - UTSouthwestern 
 %
@@ -153,6 +174,8 @@ pm = struct(...
     'correct13',ip.Results.correct13,...
     'correct12',ip.Results.correct12,...
     'correct23',ip.Results.correct23,...
+    'clus_thre',ip.Results.clus_thre,...
+    'RAMsave',ip.Results.RAMsave,...
     'plot_fig1',ip.Results.plot_fig1...
      );
  
