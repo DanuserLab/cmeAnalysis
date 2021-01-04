@@ -11,7 +11,7 @@
 %       'Cutoff_f' : Minimum length of tracks to load, in frames. Default: 3
 %
 %
-% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

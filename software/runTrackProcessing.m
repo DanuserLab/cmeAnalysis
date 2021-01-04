@@ -21,7 +21,7 @@
 % Notes: The buffer size influences the number of visible tracks. For a buffer size of
 %        5 frames, only tracks initiating in frame 6 are treated as valid.
 %
-% Copyright (C) 2020, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
