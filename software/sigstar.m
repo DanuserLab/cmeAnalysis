@@ -68,7 +68,7 @@ function varargout=sigstar(groups,stats,nosort)
     %
     % Rob Campbell - CSHL 2013
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -197,7 +197,7 @@ function varargout=sigstar(groups,stats,nosort)
     H=ones(length(groups),2); %The handles will be stored here
 
     y=ylim;
-    yd=myRange(y)*0.05; %separate sig bars vertically by 5% 
+    yd=myRange(y)*0.06; %separate sig bars vertically by 5% 
 
     for ii=1:length(groups)
         thisY=findMinY(xlocs(ii,:))+yd;

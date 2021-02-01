@@ -4,7 +4,7 @@ function trackMovie(processOrMovieData,varargin)
 % Sebastien Besson, 5/2011
 % Updated Andrew R. Jamieson Mar 2017
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -41,10 +41,12 @@ p = parseProcessParams(trackProc, paramsIn);
 
 % precondition / error checking
 if isa(trackProc, 'TrackingDynROIProcess')
-    buildDynROIProcId = movieData.getProcessIndex('BuildDynROIProcess'); % if numel(buildDynROIProcId) > 1, popup window will show and let user to choose which BuildDynROIProcess.
-    if isempty(buildDynROIProcId)
-        error("BuildDynROIProcess needs to be done before run TrackingDynROIProcess.")
-    elseif ~ismember(1, movieData.processes_{buildDynROIProcId}.funParams_.ChannelIndex)
+%     If numel(buildDynROIProcId) > 1, popup window will show and let user to choose which BuildDynROIProcess. 
+%     Later, added in the setting GUI for user to select a BuildDynROIProcess, so comment out.
+%     buildDynROIProcId = movieData.getProcessIndex('BuildDynROIProcess');
+    if isempty(p.processBuildDynROI)
+        error("BuildDynROIProcess needs to be done and selected in setting before run TrackingDynROIProcess.")
+    elseif ~ismember(1, p.processBuildDynROI.funParams_.ChannelIndex)
         error("Channel 1 in BuildDynROIProcess needs to be analyzed before run TrackingDynROIProcess.")
     end
 end
@@ -53,7 +55,13 @@ end
 
 % Check detection process first
 if isempty(p.DetProcessIndex)
-    p.DetProcessIndex = movieData.getProcessIndex('DetectionProcess',1,1);
+    % show only relevant detection processes in the list selection dialog
+    % box for TrackingDynROIProcess. edit 2021-01-06
+    if isa(trackProc, 'TrackingDynROIProcess')
+        p.DetProcessIndex = movieData.getProcessIndex('PointSourceDetectionProcess3DDynROI',1,1);
+    else
+        p.DetProcessIndex = movieData.getProcessIndex('DetectionProcess',1,1);
+    end
 
     if isempty(p.DetProcessIndex)
         error(['Detection has not been run! '...
@@ -164,6 +172,11 @@ for i = p.ChannelIndex
 
     if movieData.is3D && (~isempty(p.processBuildDynROI))
         %% replace the trajectory with original detections
+        tracksFinalStripped=rmfield(tracksFinal,'tracksCoordAmpCG');
+        tracksOrigDetect=TracksHandle(tracksFinalStripped,mappedDetections.getStruct()); 
+        tracksFinal=tracksOrigDetect.getStruct()';
+
+        %% Transfrom lab ref back in the DynROI Ref (useful for the GUI)
         if isa(p.processBuildDynROI, 'BuildDynROIProcess')
             dynROICell=p.processBuildDynROI.loadChannelOutput(1); % iChan is mandatory input for BuildDynROIProcess.loadChannelOutput, BuildDynROIProcess used in package.
         else
@@ -171,14 +184,37 @@ for i = p.ChannelIndex
         end
         dynROI=dynROICell{1};
         ref=dynROI.getDefaultRef();
-        tracksFinalStripped=rmfield(tracksFinal,'tracksCoordAmpCG');
-        tracksOrigDetect=TracksHandle(tracksFinalStripped,mappedDetections.getStruct()); 
         tracksDynROIRef=ref.applyBase(tracksOrigDetect);
         [BBmin,BBmax]=dynROI.getBoundingBox(ref);
         tracksDynROIRef.addOffset(-BBmin(1)+1,-BBmin(2)+1,-BBmin(3)+1);
         tracksFinalDynROIRef_oldFormat=tracksDynROIRef.getStruct();
         save(outFilePaths{4,i},'tracksDynROIRef','tracksFinalDynROIRef_oldFormat');
-        tracksFinal=tracksOrigDetect.getStruct()';
+
+        if(p.EstimateTrackability)
+            %% Project debugging information back into lab ref 
+            samples=trackabilityData.samplesDetections.addOffset(-1000,-1000,-1000);
+            samples=ref.applyInvBase(samples);
+            trackabilityData.samplesDetections=samples;
+
+            samples=trackabilityData.predExpectation.addOffset(-1000,-1000,-1000);
+            samples=ref.applyInvBase(samples);
+            trackabilityData.predExpectation=samples;
+
+        end
+    end
+
+    if movieData.is3D && (p.EstimateTrackability)
+        %% Track segment mapping
+        segTrackability=cell(1,length(tracksFinal));
+        for tIdx=1:length(tracksFinal)
+            tr=TracksHandle(tracksFinal(tIdx));
+            nonGap=~tr.gapMask();
+            nonGap=nonGap(1:end-1);  % T-1 segments.
+            linkIdx=find(nonGap);
+            segTrackability{tIdx}=nan(size(nonGap));
+            segTrackability{tIdx}(linkIdx)=arrayfun(@(pIdx) trackabilityData.trackabilityCost{tr.f(pIdx)+1}(tr.tracksFeatIndxCG(pIdx)),linkIdx);
+        end
+        trackabilityData.segTrackability=segTrackability;
     end
     
     save(outFilePaths{1,i},'tracksFinal');

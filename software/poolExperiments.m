@@ -9,7 +9,7 @@ function [data_all] = poolExperiments(varargin)
 % Dinah Loerke, March 15, 2009
 % Last Modified: Francois Aguet, 01/21/2010
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

@@ -13,7 +13,7 @@ ip.parse(varargin{:});
 p=ip.Results;
 %%
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -59,7 +59,7 @@ if(~isempty(detections))
             X=X*XRatio;
             Y=Y*YRatio;
             if(iscell(p.radius))
-                radius=ceil(p.radius{fIdx}*XRatio);
+                radius=ceil(p.radius{min(end,fIdx)}*XRatio);
             else
                 radius=ceil(p.radius*XRatio);
             end

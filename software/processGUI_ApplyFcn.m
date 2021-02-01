@@ -4,7 +4,7 @@ function processGUI_ApplyFcn(hObject, eventdata, handles,funParams,varargin)
 %
 % Sebastien Besson May 2011 (last modified Oct 2011)
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -22,6 +22,9 @@ function processGUI_ApplyFcn(hObject, eventdata, handles,funParams,varargin)
 % along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
 % 
 % 
+
+% Add ImageData compatibility
+% Updated by Qiongjing (Jenny) Zou, Jun 2020
 
 % Check input
 ip = inputParser;
@@ -50,6 +53,8 @@ if isfield(userData,'MD'),
     field = 'MD';
 elseif isfield(userData,'ML');
     field = 'ML';
+elseif isfield(userData,'ImD');
+    field = 'ImD';
 else
     error('Missing movie');
 end

@@ -9,7 +9,7 @@ classdef PointSourceDetectionProcess3DDynROI < PointSourceDetectionProcess3D
     %
     % Qiongjing (Jenny) Zou, July 2019
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -87,9 +87,11 @@ classdef PointSourceDetectionProcess3DDynROI < PointSourceDetectionProcess3D
             funParams.frameRange=[1 owner.nFrames_];
             
 %             types = PointSourceDetectionProcess3DDynROI.getDetectionTypeOptions;
-            funParams.algorithmType = {'pointSourceAutoSigmaFit'};
+            % funParams.algorithmType = {'pointSourceAutoSigmaFit'};
+            funParams.algorithmType = {'multiscaleDetectionDebug'}; % Change the default for NewUtrack3DPackage, on 2020-11-25
 
-            funParams.alpha=.05;
+            % funParams.alpha=.05;
+            funParams.alpha=.001; % Change the default for NewUtrack3DPackage, on 2020-11-25
             funParams.Mode = {'xyzAc'};
             funParams.FitMixtures = false;
             funParams.MaxMixtures = 5;
@@ -98,15 +100,16 @@ classdef PointSourceDetectionProcess3DDynROI < PointSourceDetectionProcess3D
             funParams.RefineMaskLoG = false;
             funParams.RefineMaskValid = false;
             funParams.ClearMaskBorder = true;
-            funParams.processBuildDynROI=[];
-            funParams.buildDynROIProcessChannel=1; % Added for the setting GUI, but not used in the wrapper func.
+            funParams.processBuildDynROI=[]; % make first available DynROIProc selected&set on the GUI, even default is empty in the process class. edited on 2021-01-04
+            funParams.buildDynROIProcessChannel=1;
             funParams.saveMaskFilePattern=[];
             funParams.samplePos=[];
 
 
             %% multiscale detector
             funParams.debug=false;
-            funParams.scales=[2:0.5:4];
+            % funParams.scales=[2:0.5:4];
+            funParams.scales=[1.25:0.5:2.25]; % Change the default for NewUtrack3DPackage, on 2020-11-25
             funParams.version='';
             
 
@@ -142,22 +145,5 @@ classdef PointSourceDetectionProcess3DDynROI < PointSourceDetectionProcess3D
             funParams = prepPerChannelParams(funParams, nChan);
         end
         
-        function validTypes =  getValidAlgorithmTypes()
-            validTypes = {'watershedApplegateAuto', ...
-                          'watershedApplegate',...
-                          'bandPassWatershed',...
-                          'watershedMatlab',...
-                          'markedWatershed',...
-                          'pointSourceLM',...
-                          'pointSource',...
-                          'pointSourceAutoSigma',...
-                          'pointSourceAutoSigmaFit',...
-                          'pSAutoSigmaMarkedWatershed',...
-                          'pSWatershed',...
-                          'pointSourceAutoSigmaMixture',... 
-                          'pointSourceAutoSigmaLM',...     
-                          'pointSourceAutoSigmaFitSig',... 
-                          'pSAutoSigmaWatershed'};
-        end
     end    
 end

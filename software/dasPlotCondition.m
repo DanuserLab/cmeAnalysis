@@ -1,32 +1,29 @@
 
 
-function [figH] = dasPlotCondition(data, DAS_all, idx, con_name, DAS_stat, test_p,pm,dir_alt, varargin)
+function [figH] = dasPlotCondition(DAS_all, idx, DAS_stat, test_p,pm, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('data', @(x) iscell(x));
 ip.addRequired('DAS_all', @(x) iscell(x));
 ip.addRequired('idx', @(x) iscell(x));
-ip.addRequired('con_name', @(x) iscell(x));
 ip.addRequired('DAS_stat', @(x) iscell(x));
 ip.addRequired('test_p', @(x) isstruct(x));
 ip.addRequired('pm', @(x) isstruct(x));
-ip.addRequired('dir_alt', @(x) ischar(x));
 ip.addParameter('fig_name', 'fig_cond', @ischar);
 
-ip.parse(data, DAS_all, idx, con_name, DAS_stat, test_p,pm,dir_alt, varargin{:});
+ip.parse(DAS_all, idx, DAS_stat, test_p,pm, varargin{:});
 
 
 DAS_all = ip.Results.DAS_all;
-con_name = ip.Results.con_name;
+
 idx = ip.Results.idx;
 DAS_stat = ip.Results.DAS_stat;
 fig_name = ip.Results.fig_name;
 pm = ip.Results.pm;
-dir_alt = ip.Results.dir_alt;
+con_name = pm.con_name;
 %==========================================================================
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -45,16 +42,15 @@ dir_alt = ip.Results.dir_alt;
 % 
 % 
 num_condition = max(size(DAS_all));
-num_clus =3;
 %==========================================================================
 label1 = pm.label1;
 label2 = pm.label2;
-label3 = pm.label3;
 %==========================================================================
 color_clus = pm.color_clus;
 %==========================================================================
 figH = cell(3,1);
 %==========================================================================
+if strcmp(pm.fig_disp_mod, 'default')
 desktop = com.mathworks.mde.desk.MLDesktop.getInstance;
 desktop.addGroup(fig_name);
 desktop.setGroupDocked(fig_name, 0);
@@ -70,11 +66,18 @@ for iFig = 1:n_fig
 end
 warning(bakWarn);
 desktop.setDocumentArrangement(fig_name, 2, myDim)
+elseif strcmp(pm.fig_disp_mod, 'single')
+n_fig = 3 * num_condition;
+figH{1}    = gobjects(n_fig, 1);
+for iFig = 1:n_fig
+   figH{1}(iFig) = figure;
+end
+end
 %==========================================================================
 for i_condition = 1:num_condition
     figure(figH{1}(i_condition)); hold on
     title(con_name{i_condition});
-dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},'fig_exist',figH{1}(i_condition));
+dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},pm,'fig_exist',figH{1}(i_condition));
 if pm.plot_mode
 scatter(DAS_stat{i_condition}.d_mod(1), DAS_stat{i_condition}.dv_mod(1),100,'o','MarkerEdgeColor',[1 1 1],'LineWidth',1);hold on;
 scatter(DAS_stat{i_condition}.d_mod(3), DAS_stat{i_condition}.dv_mod(3),100,'x','MarkerEdgeColor',[0 1 0],'LineWidth',1);hold on;
@@ -92,53 +95,69 @@ sum_tem2 = sum(sum(DAS_stat{1}.z_d_dv));
 Delta_d1d2=(DAS_stat{1}.edges_d_dv{2}(end)-DAS_stat{1}.edges_d_dv{2}(end-1))...
           *(DAS_stat{1}.edges_d_dv{1}(end)-DAS_stat{1}.edges_d_dv{1}(end-1));
 dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv/sum_tem1/Delta_d1d2-DAS_stat{1}.z_d_dv/sum_tem2/Delta_d1d2,...
-          DAS_stat{i_condition}.edges_d_dv, {label2,label1},...
+          DAS_stat{i_condition}.edges_d_dv, {label2,label1},pm,...
           'fig_exist',figH{1}(i_condition+num_condition*2),'is_diff',true...
           );
 end
 end
 %==========================================================================
+if strcmp(pm.fig_disp_mod, 'default')
 desktop = com.mathworks.mde.desk.MLDesktop.getInstance;
 desktop.addGroup([fig_name '_2']);
 desktop.setGroupDocked([fig_name '_2'], 0);
 myDim   = java.awt.Dimension(4, 3);   % 4 columns, 2 rows
+bakWarn = warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
+end
 % 1: Maximized, 2: Tiled, 3: Floating
 n_fig = 4 * 3;
 figH{2}    = gobjects(n_fig, 1);
-bakWarn = warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 for iFig = 1:n_fig
     if (iFig > 6) && (iFig<11) 
         if  (pm.pdf_conf == false)
+            if strcmp(pm.fig_disp_mod, 'default')
         figH{2}(iFig) = figure('WindowStyle', 'docked', ...
          'Name', sprintf('Figure %d', iFig), 'NumberTitle', 'off');
         set(get(handle(figH{2}(iFig)), 'javaframe'), 'GroupName', [fig_name '_2']);
+            elseif strcmp(pm.fig_disp_mod, 'single')
+                figH{2}(iFig) = figure;
+            end
         end
     else
+        if strcmp(pm.fig_disp_mod, 'default')
     figH{2}(iFig) = figure('WindowStyle', 'docked', ...
       'Name', sprintf('Figure %d', iFig), 'NumberTitle', 'off');
     set(get(handle(figH{2}(iFig)), 'javaframe'), 'GroupName', [fig_name '_2']);
+        elseif strcmp(pm.fig_disp_mod, 'single')
+            figH{2}(iFig) = figure;
+        end
     end
 end
 if pm.pdf_conf == true
-   fig_exist = dasPdfConf(data, dir_alt, pm, con_name, DAS_stat, DAS_all, idx,'LT_not_Imax',true);
+   fig_exist = dasPdfConf(pm, DAS_stat, DAS_all, idx,'LT_not_Imax',true);
    figH{2}(7) = fig_exist{1}; figH{2}(8) = fig_exist{2};
+   if strcmp(pm.fig_disp_mod, 'default')
    set(figH{2}(7),'WindowStyle','docked');
    set(get(handle(figH{2}(7)), 'javaframe'), 'GroupName', [fig_name '_2']);
    %---------------------------
    set(figH{2}(8),'WindowStyle','docked');
    set(get(handle(figH{2}(8)), 'javaframe'), 'GroupName', [fig_name '_2']);
+   end
    %---------------------------
-   fig_exist = dasPdfConf(data, dir_alt, pm, con_name, DAS_stat, DAS_all, idx,'LT_not_Imax',false);
+   fig_exist = dasPdfConf(pm, DAS_stat, DAS_all, idx,'LT_not_Imax',false);
    figH{2}(9) = fig_exist{1}; figH{2}(10) = fig_exist{2};
+   if strcmp(pm.fig_disp_mod, 'default')
    set(figH{2}(9),'WindowStyle','docked');
    set(get(handle(figH{2}(9)), 'javaframe'), 'GroupName', [fig_name '_2']);
    %---------------------------
    set(figH{2}(10),'WindowStyle','docked');
    set(get(handle(figH{2}(10)), 'javaframe'), 'GroupName', [fig_name '_2']);
+   end
    %---------------------------
 end
+if strcmp(pm.fig_disp_mod, 'default')
 warning(bakWarn);
 desktop.setDocumentArrangement([fig_name '_2'], 2, myDim)
+end
 %==========================================================================
 dasPlotBar(DAS_all, idx, DAS_stat,test_p,con_name, pm, 'fig_exist',{figH{2}(1),figH{2}(2),figH{2}(3),figH{2}(4),figH{2}(5)});
 %==========================================================================
@@ -167,7 +186,7 @@ else
     else
         c = categorical({'CCP','PCs'});
     end
-   h = bar(c, x_temp);
+   bar(c, x_temp);
 end
 xtickangle(45)
 %==========================================================================
@@ -278,18 +297,15 @@ xlim([0 250])
 %    %---------------------------
 %==========================================================================
 if pm.plot_cohort
-[fig_exist] = dasCohorts(data, DAS_all, idx,dir_alt, pm);
+[fig_exist] = dasCohorts(DAS_all, idx, pm);
 %==========================================================================
+if strcmp(pm.fig_disp_mod, 'default')
 desktop = com.mathworks.mde.desk.MLDesktop.getInstance;
 desktop.addGroup([fig_name '_3']);
 desktop.setGroupDocked([fig_name '_3'], 0);
-if pm.plot_EpiTIRF == true
-myDim   = java.awt.Dimension(size(fig_exist,1)+2, size(fig_exist,2));   % 4 columns, 2 rows
-n_fig = (size(fig_exist,2))* (size(fig_exist,1)+2);
-else
-    myDim   = java.awt.Dimension(size(fig_exist,1), size(fig_exist,2));
+
+    %myDim   = java.awt.Dimension(size(fig_exist,1), size(fig_exist,2));
     n_fig = size(fig_exist,2)* (size(fig_exist,1));
-end
 
 % 1: Maximized, 2: Tiled, 3: Floating
 
@@ -301,16 +317,15 @@ for iFig = 1:size(fig_exist,2)* (size(fig_exist,1))
    set(get(handle(figH{3}(iFig)), 'javaframe'), 'GroupName', [fig_name '_3']);
 end
 warning(bakWarn);
+elseif strcmp(pm.fig_disp_mod, 'single')
+    n_fig = size(fig_exist,2)* (size(fig_exist,1));
+    figH{3}    = gobjects(n_fig, 1);
+    for iFig = 1:n_fig
+        figH{3}(iFig) = fig_exist{iFig};
+    end
+end
 %==========================================================================
 if pm.plot_EpiTIRF == true   
-    fig_exist = dasEpiTIRF(data, dir_alt, pm, con_name, DAS_stat,DAS_all,idx);
-    figH{3}(end-1) = fig_exist{1};
-    figH{3}(end) = fig_exist{2};
-    set(figH{3}(end-1),'WindowStyle','docked');
-    set(figH{3}(end),'WindowStyle','docked');
-    set(get(handle(figH{3}(end-1)), 'javaframe'), 'GroupName', [fig_name '_3']);
-    set(get(handle(figH{3}(end)), 'javaframe'), 'GroupName', [fig_name '_3']);
+    dasEpiTIRF(pm);   
 end
-
-desktop.setDocumentArrangement([fig_name '_3'], 2, myDim)
 end

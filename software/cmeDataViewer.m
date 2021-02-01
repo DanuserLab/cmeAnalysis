@@ -1,6 +1,6 @@
 %cmeDataViewer(data, varargin) displays movies with associated detection and tracking results.
 %
-% Inputs:
+% Inputs:    
 %             data : single movie structure returned by loadConditionData.m
 %
 % Options (specifier/value format):
@@ -11,24 +11,24 @@
 %       'Cutoff_f' : Minimum length of tracks to load, in frames. Default: 3
 %
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
-%
+% 
 % CMEAnalysis_Package is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-%
+% 
 % CMEAnalysis_Package is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
-%
+% 
 % You should have received a copy of the GNU General Public License
 % along with CMEAnalysis_Package.  If not, see <http://www.gnu.org/licenses/>.
-%
-%
+% 
+% 
 
 % Francois Aguet, 2011 (last modified 03/30/2014)
 
@@ -351,7 +351,7 @@ tracks = [];
 maxA = [];
 if ip.Results.LoadTracks
     fprintf('Loading tracks ... ');
-
+    
     % identify track file
     fileList = dir([data.source ip.Results.RelativePath filesep 'ProcessedTracks*.mat']);
     fileList = {fileList.name};
@@ -380,14 +380,14 @@ if ip.Results.LoadTracks && exist([data.source ip.Results.RelativePath filesep f
     %    bgA = [bgA{:}];
     %end
     clear tmp;
-
+    
     [~, sortIdx] = sort([tracks.lifetime_s], 'descend');
     tracks = tracks(sortIdx);
     nt = numel(tracks);
     trackIndex.all = 1:nt;
     trackIndex.lft = [tracks.lifetime_s];
     trackIndex.cat = [tracks.catIdx];
-
+    
     % apply frame cutoff, cell mask
     idx = [tracks.lifetime_s] >= data.framerate*ip.Results.Cutoff_f;
     if ~isempty(cellMask)
@@ -399,7 +399,7 @@ if ip.Results.LoadTracks && exist([data.source ip.Results.RelativePath filesep f
         end
         idx = idx & (cellMask(sub2ind([ny nx], y, x))==1);
     end
-
+    
     % track labels (GUI annotation)
     if exist(tlFile,'file')==2
         tmp = load(tlFile);
@@ -409,26 +409,26 @@ if ip.Results.LoadTracks && exist([data.source ip.Results.RelativePath filesep f
         trackIndex.label = zeros(1,nt);
         trackIndex.label(idx & [tracks.catIdx]==1) = 1; % all loaded & valid
     end
-
+    
     % index of loaded tracks
     trackIndex.loaded = find(idx);
     tracks = tracks(idx);
     nt = numel(tracks);
-
-
+    
+    
     minLft = min([tracks.lifetime_s]);
     maxLft = max([tracks.lifetime_s]);
     % slider values; minLft, maxLft are const
     minVal = max(data.framerate*5, minLft); % Display tracks >= 5 frames by default
     maxVal = maxLft;
-
+    
     % initially tracks with lifetime >= minVal are selected
     trackIndex.selected = [tracks.lifetime_s]>=minVal;
     % current track: pointer to 'loaded' array
     trackIndex.current = find(trackIndex.selected, 1, 'first');
-
+    
     nseg = [tracks.nSeg];
-
+    
     np = sum(nseg);
     X = NaN(nf, np);
     Y = NaN(nf, np);
@@ -443,22 +443,22 @@ if ip.Results.LoadTracks && exist([data.source ip.Results.RelativePath filesep f
     fvec = [tracks.f];
     xvec = [tracks.x];
     yvec = [tracks.y];
-
+   
     % vector of start indexes since multiple segments/track
     tidx = cumsum([1 nseg(1:end-1)]);
-
+    
     trackStarts = [tracks.start];
     trackEnds = [tracks.end];
     mu_x = NaN(1,nt);
     mu_y = NaN(1,nt);
-
+    
     for t = 1:nt
         if nseg(t)==1
             X(tracks(t).f, tidx(t)) = tracks(t).x(1,:);
             Y(tracks(t).f, tidx(t)) = tracks(t).y(1,:);
             G(tracks(t).f, tidx(t)) = tracks(t).gapVect;
             mu_x(t) = nanmean(X(:,tidx(t)));
-            mu_y(t) = nanmean(Y(:,tidx(t)));
+            mu_y(t) = nanmean(Y(:,tidx(t)));           
         else
             sep = find(isnan(tracks(t).t));
             sep = [0 sep numel(tracks(t).f)+1]; %#ok<AGROW>
@@ -472,13 +472,13 @@ if ip.Results.LoadTracks && exist([data.source ip.Results.RelativePath filesep f
             mu_y(t) = nanmean(nanmean(Y(:,tidx(t):tidx(t)+s-1)));
         end
     end
-
+    
     % segment index
     % Example: [1 1 2 3 4 4 ... ] first two cols are from same track
     idx = diff([tidx size(X,2)+1]);
     idx = arrayfun(@(i) i+zeros(1, idx(i)), 1:numel(idx), 'unif', 0);
     trackIndex.segmentIndex = [idx{:}];
-
+    
     % min/max track intensities
     maxA = arrayfun(@(t) max(t.A, [], 2), tracks, 'unif', 0);
     maxA = [maxA{:}];
@@ -540,7 +540,7 @@ else
     set([trackCheckbox trackChoice trackRangeButton gapCheckbox trackEventCheckbox eapCheckbox], 'Enable', 'off');
     set([montageAlignCheckbox montageMarkerCheckbox montageDetectionCheckbox montageButton], 'Enable', 'off');
     %set(handles.montagePanel, 'Visible', 'off');
-    hLegend = 0; %fixes error in MATLAB2019b
+    hLegend = 0; %fixes error in MATLAB2019b onwards
     set(hLegend, 'Visible', 'off');
     set([tplotText tplotUnitChoice tplotBackgroundCheckbox tplotOverlayCheckbox tplotScaleCheckbox tplotRangeCheckbox], 'Enable', 'off');
 end
@@ -623,14 +623,14 @@ set(hz, 'ActionPostCallback', @czoom);
             a = get(gca, 'CurrentPoint');
             x0 = a(1,1);
             y0 = a(1,2);
-
+            
             % track segments visible in current frame
             cidx = find([tracks.start]<=fidx & fidx<=[tracks.end] & trackIndex.selected);
             if ~isempty(cidx)
                 % distance to mean of tracks
                 d = sqrt((x0-mu_x(cidx)).^2 + (y0-mu_y(cidx)).^2);
                 [~,d] = nanmin(d);
-
+                
                 % update selected (current) track (pointer to 'loaded')
                 trackIndex.current = cidx(d);
                 set(handles.trackSlider, 'Value', find(trackIndex.current==find(trackIndex.selected)));% calls updateTrack
@@ -732,7 +732,7 @@ set(hz, 'ActionPostCallback', @czoom);
                     p = 1;
                 end
                 setColormap();
-
+                
             case 'i'
                 invertContrast = ~invertContrast;
                 setColormap();
@@ -770,7 +770,7 @@ set(hz, 'ActionPostCallback', @czoom);
         else
             set(gcbo, 'Checked', 'on');
         end
-
+        
         switch get(gcbo, 'Label')
             case 'Annotate'
                 doAnnotate = strcmp(get(gcbo, 'Checked'),'on');
@@ -792,7 +792,7 @@ set(hz, 'ActionPostCallback', @czoom);
         end
         delete(hfig);
     end
-
+        
 
     function initStackviewer()
         N = numel(handles.fPanels);
@@ -834,36 +834,36 @@ set(hz, 'ActionPostCallback', @czoom);
                 hyz(1) = imagesc(lframe, 'Parent', handles.fAxes(1,2), 'HitTest', 'off');
                 hxz(1) = imagesc(tframe, 'Parent', handles.fAxes(1,3), 'HitTest', 'off');
         end
-
+        
         for ci = 1:N
             % x,y view
             hold(handles.fAxes(ci,1), 'on');
             set(handles.fAxes(ci,1), 'ButtonDownFcn', @axesClick_Callback);
             hl(ci,1) = plot(handles.fAxes(ci,1), [xs xs], [0.5 ny+0.5], 'Color', lcolor, 'HitTest', 'off', 'DisplayName', 'FrameMarker');
             hl(ci,2) = plot(handles.fAxes(ci,1), [0.5 nx+0.5], [ys ys], 'Color', lcolor, 'HitTest', 'off', 'DisplayName', 'FrameMarker');
-
+            
             % y,z view
             hold(handles.fAxes(ci,2), 'on');
             % line in y,z view
             hl(ci,3) = plot(handles.fAxes(ci,2), fidx*[1 1], [0.5 ny+0.5], 'Color', lcolor, 'HitTest', 'off');
             hold(handles.fAxes(ci,2), 'off');
-
+            
             % x,z view
             hold(handles.fAxes(ci,3), 'on');
             % line in x,z view
             hl(ci,4) = plot(handles.fAxes(ci,3), [0.5 nx+0.5], fidx*[1 1], 'Color', lcolor, 'HitTest', 'off');
             hold(handles.fAxes(ci,3), 'off');
-
+            
             arrayfun(@(i) caxis(i, dRange{ci}), handles.fAxes(ci,:), 'unif', 0);
         end
-
+        
         set(handles.fAxes, 'XTick', [], 'YTick', []);
         axis(handles.fAxes(:,1), 'equal');
         % this fixes a bug with axis 'equal' that allows panning beyond boundaries
         set(handles.fAxes(:,1), 'XLim', [0.5 nx+0.5], 'YLim', [0.5 ny+0.5]);
-
+        
         set(handles.fAxes, 'ButtonDownFcn', @axesClick_Callback);
-
+        
         % plot current track marker
         if ~isempty(tracks)
             hst = zeros(1,N);
@@ -872,8 +872,8 @@ set(hz, 'ActionPostCallback', @czoom);
                     Y(fidx, trackIndex.segmentIndex==trackIndex.current), 'ws', 'DisplayName', 'TrackMarker', 'MarkerSize', 12, 'HitTest', 'off');
             end
         end
-
-
+        
+        
         if ~isRGB
             set(labelCheckbox, 'Enable', 'on');
             dx = 0.03;
@@ -893,9 +893,9 @@ set(hz, 'ActionPostCallback', @czoom);
     end
 
 
-    function updateSlice(varargin)
+    function updateSlice(varargin)       
         switch displayType
-            case 'raw'
+            case 'raw'                
                 for ci = 1:nCh
                     set(hxy(ci), 'CData', stack{ci}(:,:,fidx));
                 end
@@ -912,11 +912,11 @@ set(hz, 'ActionPostCallback', @czoom);
                 end
                 set(hxy(1), 'CData', rframe);
         end
-
+        
         set(hl(:,3), 'XData', fidx*[1 1]);
-        set(hl(:,4), 'YData', fidx*[1 1]);
+        set(hl(:,4), 'YData', fidx*[1 1]);        
         set(handles.frameLabel, 'String', ['Frame ' num2str(fidx)]);
-
+        
         if all(ishandle(hms))
             delete(hms);
         end
@@ -927,7 +927,7 @@ set(hz, 'ActionPostCallback', @czoom);
                 hms = [hms; cellfun(@(i) plot(handles.fAxes(ci,1), i(:,2), i(:,1), 'Color', 'r', 'LineWidth', 1), B, 'UniformOutput', false)]; %#ok<AGROW>
             end
         end
-
+        
         if ~isempty(tracks)
             % update current frame marker in track plots
             for ci = 1:max(1, nCh*~get(tplotOverlayCheckbox, 'Value'))
@@ -964,7 +964,7 @@ set(hz, 'ActionPostCallback', @czoom);
                 if~isempty(bcoord)
                     hps = plot(handles.fAxes(1,1), bcoord(:,1), bcoord(:,2), '*', 'Color', 'g', 'MarkerSize', 8, 'LineWidth', 1);
                 end
-
+                
                 % Deaths
                 dcoord = arrayfun(@(i) [i.x(1,1) i.y(1,1)], tracks(trackEnds==fidx & trackIndex.selected), 'unif', 0);
                 dcoord = vertcat(dcoord{:});
@@ -976,7 +976,7 @@ set(hz, 'ActionPostCallback', @czoom);
         else
             set(hst, 'Visible', 'off');
         end
-
+        
         if ~isempty(tracks) && get(eapCheckbox, 'Value') && numel(handles.fPanels)>1
             for ci = 2:nCh
                 sel = fvec==fidx & mvec(ci,:)==1;
@@ -988,7 +988,7 @@ set(hz, 'ActionPostCallback', @czoom);
                 hps = [hps; hp1; hp2; hp3]; %#ok<AGROW>
             end
         end
-
+        
         if all(ishandle(hpd))
             delete(hpd); % clear previous plots
         end
@@ -1009,11 +1009,11 @@ set(hz, 'ActionPostCallback', @czoom);
         % plot lines
         set(hl(:,1), 'XData', xs*[1 1]);
         set(hl(:,2), 'YData', ys*[1 1]);
-
+        
         % update data
         xi = min(max(xs,1), nx);
         yi = min(max(ys,1), ny);
-
+        
         switch displayType
             case 'RGB'
                 for ci = 1:nCh
@@ -1068,8 +1068,8 @@ set(hz, 'ActionPostCallback', @czoom);
         end
         str = cellstr(get(trackChoice, 'String'));
         str = str{get(trackChoice,'Value')};
-        setColorbar(str);
-        restoreFocus();
+        setColorbar(str);        
+        restoreFocus();       
     end
 
 
@@ -1118,7 +1118,7 @@ set(hz, 'ActionPostCallback', @czoom);
             set(handles.fAxes(:,2), 'YLim', YLim);
             set(handles.fAxes(:,3), 'XLim', XLim);
         end
-
+        
     end
 
     % Pan functions
@@ -1134,7 +1134,7 @@ set(hz, 'ActionPostCallback', @czoom);
         % get limits of current axes
         XLim = get(eventdata.Axes, 'XLim');
         YLim = get(eventdata.Axes, 'YLim');
-
+        
         switch find(any(handles.fAxes == eventdata.Axes,1))
             case 1
                 set(handles.fAxes(:,1), 'XLim', XLim, 'YLim', YLim);
@@ -1165,7 +1165,7 @@ set(hz, 'ActionPostCallback', @czoom);
         tmp = find(trackIndex.selected);
         trackIndex.current = tmp(t0);
         updateTrack();
-
+        
         % if track not visible in frame plot, jump to first frame
         % t = handles.tracks{1}(t);
         % if fidx < t.start || fidx > t.end
@@ -1192,11 +1192,11 @@ set(hz, 'ActionPostCallback', @czoom);
                 set(handles.trackIndex.label, 'String', ['Track: ' num2str(trackIndex.loaded(trackIndex.current))...
                     ' (Label: ' num2str(trackIndex.label(trackIndex.loaded(trackIndex.current))) ')']);
             end
-
+            
             % update selected track marker position
             set(hst, 'XData', X(fidx, trackIndex.segmentIndex==trackIndex.current), 'YData', Y(fidx, trackIndex.segmentIndex==trackIndex.current));
-
-
+            
+            
             itrack = tracks(trackIndex.current);
             if get(tplotBackgroundCheckbox, 'Value')
                 bgMode = 'zero';
@@ -1210,13 +1210,13 @@ set(hz, 'ActionPostCallback', @czoom);
                     itrack.endBuffer.t = itrack.f(end) + (1:numel(itrack.startBuffer.t));
                 end
             end
-
+            
             % plot options
             topts0 = {'Time', 'Movie', 'BackgroundValue', bgMode};
             if get(tplotRangeCheckbox, 'Value')
                 topts0 = [topts0, 'XLim', [-2 data.movieLength+1]*data.framerate];
             end
-
+            
             % axes handles
             if ~get(tplotOverlayCheckbox, 'Value')
                 ha = handles.tAxes(1:nCh);
@@ -1229,14 +1229,14 @@ set(hz, 'ActionPostCallback', @czoom);
                     topts0 = [topts0, 'YTick', -yunit(k):yunit(k):maxInt(k)];
                 end
             end
-
+            
             arrayfun(@(i) hold(i, 'off'), ha); % reset contents
             for ci = 1:nCh
                 topts = [topts0, 'Handle', ha(ci)];
                 if get(tplotScaleCheckbox, 'Value') && ~get(tplotOverlayCheckbox, 'Value')
                     topts = [topts, 'YTick', -yunit(ci):yunit(ci):maxInt(ci)]; %#ok<AGROW>
                 end
-
+                
                 % plot background confidence level (based on secondary channel)
                 %if ~isempty(bgA) && itrack.catIdx<5
                 %   conf = bgA(ci, itrack.f);
@@ -1248,9 +1248,9 @@ set(hz, 'ActionPostCallback', @czoom);
                 %    end
                 %    topts = [topts 'BackgroundConfidence', conf]; %#ok<AGROW>
                 %end
-
+                
                 plotTrack(data, itrack, ci, topts{:});
-
+                
                 % plot current frame indicator
                 if ci==1 || ~get(tplotOverlayCheckbox, 'Value')
                     hf(ci) = plot(ha(ci), ([fidx fidx]-1)*data.framerate,...
@@ -1259,7 +1259,7 @@ set(hz, 'ActionPostCallback', @czoom);
                 set(ha(ci), 'Box', 'on');
             end
             set(handles.tAxes(1:end-1), 'XTickLabel', []);
-
+            
             if strcmpi(pUnitType, 's')
                 xlabel(handles.tAxes(end), 'Time (s)');
             else
@@ -1278,7 +1278,7 @@ set(hz, 'ActionPostCallback', @czoom);
     end
 
 
-    function unitChoice_Callback(varargin)
+    function unitChoice_Callback(varargin)       
         contents = cellstr(get(tplotUnitChoice,'String'));
         switch contents{get(tplotUnitChoice,'Value')}
             case 'Seconds'
@@ -1309,7 +1309,7 @@ set(hz, 'ActionPostCallback', @czoom);
                 eap = ones(1,nt);
                 eap(M(2,:)==1) = 3;
                 eap(S(2,:)==1 & M(2,:)==0) = 2;
-                trackColormap = trackColormap(eap,:);
+                trackColormap = trackColormap(eap,:);                
             case 'Object Type'
                 isCCP = [tracks.isCCP];
                 trackColormap = [0.8 0 0; 0 0.8 0];
@@ -1319,7 +1319,7 @@ set(hz, 'ActionPostCallback', @czoom);
         end
     end
 
-
+        
     function chlabel_Callback(~,~)
         if get(labelCheckbox, 'Value') %&& ~isRGB
             set(hChLabel, 'Visible', 'on');
@@ -1341,7 +1341,7 @@ set(hz, 'ActionPostCallback', @czoom);
     % Settings window
     %---------------------------------------------------------------------------
     function trackSettings_Callback(varargin)
-
+        
         % open window with settings panel
         tpos = get(hfig, 'Position');
         tpos = [tpos(1)+tpos(3)/2-150 tpos(2)+tpos(4)/2-75 300 255];
@@ -1350,12 +1350,12 @@ set(hz, 'ActionPostCallback', @czoom);
             'Color', get(0,'defaultUicontrolBackgroundColor'),...
             'DefaultUicontrolUnits', 'pixels', 'Units', 'pixels',...
             'Name', 'Track display settings', 'NumberTitle', 'off', 'Resize', 'off');
-
+        
         % Lifetime selection sliders
         b  = 195;
         uicontrol(pht, 'Style', 'text', 'String', 'Lifetimes:',...
             'Position', [5 b+35 90 20], 'HorizontalAlignment', 'left');
-
+        
         if maxLft>minLft
             uicontrol(pht, 'Style', 'text', 'String', 'Min.:',...
                 'Position', [5 b+18 35 20], 'HorizontalAlignment', 'left');
@@ -1365,7 +1365,7 @@ set(hz, 'ActionPostCallback', @czoom);
             addlistener(handle(minLftSlider), 'Value', 'PostSet', @minSlider_Callback);
             minTxt = uicontrol(pht, 'Style', 'text', 'String', [num2str(minVal) ' s'],...
                 'Position', [250 b+18 40 20], 'HorizontalAlignment', 'left');
-
+            
             uicontrol(pht, 'Style', 'text', 'String', 'Max.:',...
                 'Position', [5 b-2 35 20], 'HorizontalAlignment', 'left');
             maxLftSlider = uicontrol(pht, 'Style', 'slider',...
@@ -1375,12 +1375,12 @@ set(hz, 'ActionPostCallback', @czoom);
             maxTxt = uicontrol(pht, 'Style', 'text', 'String', [num2str(maxVal) ' s'],...
                 'Position', [250 b-2 40 20], 'HorizontalAlignment', 'left');
         end
-
+        
         % Track category selection
         b = 165;
         uicontrol(pht, 'Style', 'text', 'String', 'Track category:',...
             'Position', [5 b 165 20], 'HorizontalAlignment', 'left');
-
+        
         % Create the button group.
         hr = uibuttongroup('Visible', 'off', 'Units', 'pixels', 'Position', [90 b+5 120 20],...
             'BorderWidth', 0);
@@ -1392,13 +1392,13 @@ set(hz, 'ActionPostCallback', @czoom);
         set(hr,'SelectionChangeFcn',@radio_Callback);
         set(hr,'SelectedObject', rSet(setRadioVal));
         set(hr,'Visible','on');
-
+        
         b = 145;
         mitCheck = uicontrol(pht, 'Style', 'checkbox', 'String', 'Max. intensity threshold:',...
             'Position', [15 b 165 20], 'HorizontalAlignment', 'left', 'Value', mitCheckVal);
         mitText = uicontrol(pht, 'Style', 'edit', 'String', num2str(maxIntT, '%.1f'),...
             'Position', [170 b 60 20], 'HorizontalAlignment', 'right');
-
+        
         % Category selection buttons
         b = 110;
         catCheck = zeros(1,8);
@@ -1412,7 +1412,7 @@ set(hz, 'ActionPostCallback', @czoom);
             'Position', [135 b 80 15], 'HorizontalAlignment', 'left', 'Value', catCheckVal(3));
         catCheck(4) = uicontrol(pht, 'Style', 'checkbox', 'String', 'Persistent',...
             'Position', [195 b 90 15], 'HorizontalAlignment', 'left', 'Value', catCheckVal(4));
-
+        
         b = 75;
         uicontrol(pht, 'Style', 'text', 'String', 'Compound tracks: ',...
             'Position', [15 b+10 120 20], 'HorizontalAlignment', 'left');
@@ -1424,7 +1424,7 @@ set(hz, 'ActionPostCallback', @czoom);
             'Position', [135 b 80 15], 'HorizontalAlignment', 'left', 'Value', catCheckVal(7));
         catCheck(8) = uicontrol(pht, 'Style', 'checkbox', 'String', 'Persistent',...
             'Position', [195 b 90 15], 'HorizontalAlignment', 'left', 'Value', catCheckVal(8));
-
+        
         % EAP status selection buttons
         b = 35;
         eapCheck = zeros(1,3);
@@ -1437,20 +1437,20 @@ set(hz, 'ActionPostCallback', @czoom);
         eapCheck(3) = uicontrol(pht, 'Style', 'checkbox', 'String', 'N.S.',...
             'Position', [165 b 80 15], 'HorizontalAlignment', 'left', 'Value', eapCheckVal(3));
 
-
+        
         uicontrol(pht, 'Style', 'pushbutton', 'String', 'Reset',...
             'Position', [20 5 100 20], 'HorizontalAlignment', 'left',...
             'Callback', @resetButton_Callback);
         uicontrol(pht, 'Style', 'pushbutton', 'String', 'Apply',...
             'Position', [180 5 100 20], 'HorizontalAlignment', 'left',...
             'Callback', @applyButton_Callback);
-
+        
         if setRadioVal==2
             set(catCheck, 'enable', 'off');
         end
-
+        
         restoreFocus();
-
+        
         function minSlider_Callback(~, eventdata)
 %             obj = get(eventdata, 'AffectedObject');
             minVal = round(eventdata.AffectedObject.Value);
@@ -1460,7 +1460,7 @@ set(hz, 'ActionPostCallback', @czoom);
             end
             set(minTxt, 'String', [num2str(minVal) ' s']);
         end
-
+        
         function maxSlider_Callback(~, eventdata)
 %             obj = get(eventdata, 'AffectedObject');
             maxVal = round(eventdata.AffectedObject.Value);
@@ -1468,12 +1468,12 @@ set(hz, 'ActionPostCallback', @czoom);
                 maxVal = minVal;
                 set(maxLftSlider, 'Value', maxVal);
             end
-            set(maxTxt, 'String', [num2str(maxVal) ' s']);
+            set(maxTxt, 'String', [num2str(maxVal) ' s']);            
         end
-
+        
         function radio_Callback(~,eventdata)
             switch get(eventdata.NewValue,'String')
-                case 'All' %
+                case 'All' % 
                     setRadioVal = 1;
                     set(mitCheck, 'Value', mitCheckVal);
                     arrayfun(@(i) set(catCheck(i), 'Value', catCheckVal(i)), 1:8);
@@ -1485,7 +1485,7 @@ set(hz, 'ActionPostCallback', @czoom);
                     set(catCheck, 'enable', 'off');
             end
         end
-
+        
         function resetButton_Callback(varargin)
             maxVal = maxLft;
             minVal = data.framerate*5;%minLft;
@@ -1497,14 +1497,14 @@ set(hz, 'ActionPostCallback', @czoom);
             set(mitText, 'String', num2str(maxIntT, '%.1f'));
             set([catCheck eapCheck], 'Value', true, 'Enable', 'on');
         end
-
+        
         function applyButton_Callback(varargin)
             % update track selection index
             catCheckVal = cell2mat(get(catCheck, 'Value'))==1;
             eapCheckVal = cell2mat(get(eapCheck, 'Value'))==1;
             mitCheckVal = get(mitCheck, 'Value')==1;
             maxIntT = str2double(get(mitText, 'String'));
-
+            
             % EAP: indep: M(2,:)==1; M/S M(2,:)==0 & S(2,:)==1; n.s. S(2,:)==0
             trackIndex.selected = ismember([tracks.catIdx], find(catCheckVal)) & ...
                 minVal<=[tracks.lifetime_s] & [tracks.lifetime_s]<=maxVal & maxA(1,:)>=maxIntT;
@@ -1516,7 +1516,7 @@ set(hz, 'ActionPostCallback', @czoom);
                     (eapCheckVal(2) & M(2,:)==0 & S(2,:)==1) | ...
                     (eapCheckVal(3) & S(2,:)==0));
             end
-
+            
             % update track selection
             trackIndex.current = find(trackIndex.selected, 1, 'first');
             if sum(trackIndex.selected)>1
@@ -1537,7 +1537,7 @@ set(hz, 'ActionPostCallback', @czoom);
                 set(hc, 'Visible', 'off');
                 set(handles.trackIndex.label, 'String', 'Track N/A');
             end
-
+            
             if ip.Results.LoadFrames
                 updateSlice();
             end
@@ -1549,9 +1549,9 @@ set(hz, 'ActionPostCallback', @czoom);
     %---------------------------------------------------------------------------
     % End settings window
     %---------------------------------------------------------------------------
-
-
-    function setColorbar(mode)
+    
+    
+    function setColorbar(mode)        
         lfont = {'FontName', 'Helvetica', 'FontSize', 12};
         sfont = {'FontName', 'Helvetica', 'FontSize', 12, 'FontWeight', 'normal'};
         if ~isempty(tracks)
@@ -1595,7 +1595,7 @@ set(hz, 'ActionPostCallback', @czoom);
 
 
     function montageButton_Callback(varargin)
-
+        
         % Creates a montage based on the master track
         if ~isempty(trackIndex.current)
             fprintf('Generating montage...');
@@ -1617,14 +1617,14 @@ set(hz, 'ActionPostCallback', @czoom);
 
 
     function [tstack, xa, ya] = getTrackStack(t, w, reference)
-
+        
         sigma = frameInfo(1).s;
         w = ceil(w*sigma);
-
+        
         % coordinate matrices
         x0 = tracks(t).x;
         y0 = tracks(t).y;
-
+        
         % start and end buffer sizes
         if ~isempty(tracks(t).startBuffer)
             sb = numel(tracks(t).startBuffer.t);
@@ -1640,12 +1640,12 @@ set(hz, 'ActionPostCallback', @czoom);
         else
             eb = 0;
         end
-
+        
         % frame index
         tfi = tracks(t).start-sb:tracks(t).end+eb;
         tnf = length(tfi);
-
-
+        
+        
         if tracks(t).nSeg==1 && strcmpi(reference, 'track') % align frames to track
             xi = round(x0(handles.mCh,:));
             yi = round(y0(handles.mCh,:));
@@ -1668,7 +1668,7 @@ set(hz, 'ActionPostCallback', @czoom);
             xa = repmat({x0:x1}, [tnf 1]);
             ya = repmat({y0:y1}, [tnf 1]);
         end
-
+        
         tstack = cell(nCh,tnf);
         for ci = 1:nCh
             for k = 1:tnf
@@ -1690,7 +1690,7 @@ set(hz, 'ActionPostCallback', @czoom);
 
     function printButton_Callback(varargin)
         fprintf('Printing figures ...');
-
+        
         % Tracks
         if ~isempty(tracks)
             for ch = 1:nCh
@@ -1698,7 +1698,7 @@ set(hz, 'ActionPostCallback', @czoom);
                     'FileName', ['track_' num2str(trackIndex.loaded(trackIndex.current)) '_ch' num2str(ch) '.eps'],...
                     'Visible', 'off', 'DisplayMode', 'Print');
             end
-
+            
             if get(montageAlignCheckbox, 'Value')
                 ref = 'Track';
             else
@@ -1711,7 +1711,7 @@ set(hz, 'ActionPostCallback', @czoom);
                     'ShowMarkers', get(montageMarkerCheckbox, 'Value')==1,...
                     'ShowDetection', get(montageDetectionCheckbox, 'Value')==1);
         end
-
+        
         % Frames
         if strcmp(displayType, 'RGB')
             maxCh = 1;
@@ -1720,7 +1720,7 @@ set(hz, 'ActionPostCallback', @czoom);
             maxCh = nCh;
             chLabel = arrayfun(@(i) ['ch' num2str(i)], 1:nCh, 'unif', 0);
         end
-
+                
         f0 = figure('PaperPositionMode', 'auto', 'Position', [20 20 nx ny], 'Visible', 'off',...
             'DefaultLineLineSmoothing', 'on', 'DefaultPatchLineSmoothing', 'on');
         colormap(gray(256));
@@ -1733,42 +1733,42 @@ set(hz, 'ActionPostCallback', @czoom);
             delete(hx);
             hx = findobj(h0, 'LineStyle', '-');
             set(hx, 'LineWidth', 1);
-
+            
             hx = findobj(h0, 'Marker', 'o');
             set(hx, 'MarkerSize', 9, 'LineWidth', 1);
-
+            
             set(h0, 'Position', [0 0 1 1]);
             print(f0, '-depsc2', '-loose', [fpath 'frame_' num2str(fidx) '_' chLabel{ci} '.eps']);
             %print(f0, '-dpng', '-loose', [fpath 'frame_' num2str(fidx) '_' chLabel{ci} '.png']);
             delete(h0);
         end
         close(f0);
-
+        
         fprintf([' done. Figures saved in ' getShortPath(data) 'Figures.\n']);
         restoreFocus();
     end
 
 
     function movieButton_Callback(varargin)
-
+        
         fopts = {'Visible', 'off', 'Position', [20 20 nx ny],...
             'InvertHardcopy', 'off', 'PaperUnits', 'Points', 'PaperSize', [nx ny],...
             'PaperPosition', [0 0 nx ny], 'PaperPositionMode', 'auto',...
             'DefaultLineLineSmoothing','on', 'DefaultPatchLineSmoothing','on'};
-
+        
         if strcmp(displayType, 'RGB')
             maxCh = 1;
         else
             maxCh = nCh;
         end
-
+        
         mpath = [data.source 'Movies' filesep];
         fpath = [mpath 'Frames' filesep];
         [~,~] = mkdir(mpath);
         [~,~] = mkdir(fpath);
-
+        
         fmt = ['%0' num2str(ceil(log10(nf))) 'd'];
-
+        
         f0 = figure(fopts{:});
         colormap(gray(256));
         ha = axes('Position', [0 0 1 1]);
@@ -1795,12 +1795,12 @@ set(hz, 'ActionPostCallback', @czoom);
                 end
                 hold(ha, 'on');
                 caxis(ha, dRange{ci});
-
+                
                 if ~isempty(tracks) && fi~=1 && get(trackCheckbox, 'Value')
                     vidx = ~isnan(X(fi,:));
-
+                    
                     set(ha, 'ColorOrder', trackColormap(trackIndex.segmentIndex(vidx),:));
-
+                    
                     plot(ha, X(1:fi,vidx), Y(1:fi,vidx), 'HitTest', 'off');
                     if get(gapCheckbox, 'Value')
                         hpg = plot(ha, X(fi,vidx & G(fi,:)), Y(fi,vidx & G(fi,:)), 'o', 'Color', 'w', 'MarkerSize', 6, 'LineWidth', 1);
@@ -1812,7 +1812,7 @@ set(hz, 'ActionPostCallback', @czoom);
                         if~isempty(bcoord)
                             plot(ha, bcoord(:,1), bcoord(:,2), '*', 'Color', 'g', 'MarkerSize', 8, 'LineWidth', 1);
                         end
-
+                        
                         % Deaths
                         dcoord = arrayfun(@(i) [i.x(1,1) i.y(1,1)], tracks(trackEnds==fi), 'unif', 0);
                         dcoord = vertcat(dcoord{:});
@@ -1820,7 +1820,7 @@ set(hz, 'ActionPostCallback', @czoom);
                             plot(ha, dcoord(:,1), dcoord(:,2), 'x', 'Color', 'r', 'MarkerSize', 8, 'LineWidth', 1);
                         end
                     end
-
+                    
                 end
                 if ~isempty(tracks) && get(eapCheckbox, 'Value') && ci>1
                     sel = fvec==fi & mvec(ci,:)==1;
@@ -1830,7 +1830,7 @@ set(hz, 'ActionPostCallback', @czoom);
                     sel = fvec==fi & mvec(ci,:)==0 & svec(ci,:)==0;
                     plot(ha, xvec(ci,sel), yvec(ci,sel) , 'o', 'Color', 0.8*[1 1 1], 'MarkerSize', 8);
                 end
-
+                
                 if get(detectionCheckbox, 'Value') && ~isempty(frameInfo)
                     isPSF = frameInfo(fi).isPSF(1,:)==1;
                     if any(isPSF)
@@ -1840,9 +1840,9 @@ set(hz, 'ActionPostCallback', @czoom);
                         plot(ha, frameInfo(fi).x(1,~isPSF), frameInfo(fi).y(1,~isPSF), 'o', 'Color', [0.6 0 0], 'MarkerSize', 8);
                     end
                 end
-
+                
                 axis(ha, 'off');
-
+                
                 if ~strcmp(computer('arch'),'win64')
 
                     print(f0, '-dpng', '-loose', ['-r' num2str(1*72)], [fpath 'frame' num2str(fi, fmt) '_ch' num2str(ci) '.png']);
@@ -1850,7 +1850,7 @@ set(hz, 'ActionPostCallback', @czoom);
                 else
                     movieFrames(fi) = getframe(f0);
                 end
-
+                
                 cla(ha);
                 fprintf('\b\b\b\b%3d%%', round(100*fi/nf));
 
@@ -1859,33 +1859,33 @@ set(hz, 'ActionPostCallback', @czoom);
         end
         fprintf(['Frames saved to ' getShortPath(data) 'Movies' filesep 'Frames.\n']);
         close(f0);
-
+        
         if isunix
             % side-by-side frame arrangement
             for fi = 1:nf
                 % channel frames
                 cpath = arrayfun(@(ci) [fpath 'frame' num2str(fi, fmt) '_ch' num2str(ci) '.png '], 1:nCh, 'unif', 0);
                 fname = [fpath 'montage' num2str(fi, fmt) '.png'];
-
+                
                 cmd = ['export DYLD_LIBRARY_PATH=""; montage -geometry +3+3+0+0 -background "rgb(255,255,255)" '...
                     [cpath{:}] ' -compress lzw ' fname];
                 system(cmd);
                 cmd = ['export DYLD_LIBRARY_PATH=""; convert ' fname ' -shave 3x3 -depth 8 ' fname];
                 system(cmd);
             end
-        end
+        end        
         % Generate movie, if on a unix system with ffmpeg
         if isunix && ~system('which ffmpeg >/dev/null 2>&1')
             fprintf('Generating movie ... ');
             %fr = num2str(framerate);
-            fr = num2str(15);
-
+            fr = num2str(15);           
+            
             %cmd = ['ffmpeg -y -r ' fr ' -i ' fpath 'frame' fmt '_ch' num2str(1) '.png' ' -vf "scale=' num2str(2*floor(nx/2)) ':' num2str(2*floor(ny/2))...
             %    '" -c:v libx264 -crf 22 -pix_fmt yuv420p ' mpath 'Movie_ch1.mp4'];
             cmd = ['ffmpeg -y -r ' fr ' -i ' fpath 'montage' fmt '.png' ' -vf "scale=' num2str(2*floor((nCh*nx+(nCh-1)*6)/2)) ':' num2str(2*floor(ny/2))...
                 '" -c:v libx264 -crf 22 -pix_fmt yuv420p ' mpath getCellDir(data) '.mp4'];
             system(cmd);
-
+            
             fprintf(' done.\n');
         else
            fprintf('A unix system with ffmpeg installed is required to generate ffmeg movies automatically.\n');
@@ -1893,7 +1893,7 @@ set(hz, 'ActionPostCallback', @czoom);
            v = VideoWriter([fpath 'MovieCME.avi']);
            open(v);
            writeVideo(v, movieFrames);
-           close(v);
+           close(v);         
         end
         restoreFocus();
     end
@@ -1916,7 +1916,7 @@ set(hz, 'ActionPostCallback', @czoom);
     function setupFrameAxes(nPanels)
         if nargin<1
             nPanels = nCh;
-        end
+        end        
         opts = {'Parent', hfig, 'Units', 'pixels', 'BorderType', 'none'};
         axPos = getFrameAxesPositions(hfig, nPanels);
         if isfield(handles, 'fAxes') && ~isempty(handles.fAxes)
@@ -2104,3 +2104,4 @@ end
 lpos = apos{3};
 lpos([1 3]) = [left+15/pos(3) 15/pos(3)];
 end
+

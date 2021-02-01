@@ -20,7 +20,7 @@ function varargout = pointSourceDetectionProcessGUI3D(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -41,7 +41,7 @@ function varargout = pointSourceDetectionProcessGUI3D(varargin)
 
 % Edit the above text to modify the response to help anisoGaussianDetectionProcessGUI
 
-% Last Modified by GUIDE v2.5 25-Oct-2019 16:14:21
+% Last Modified by GUIDE v2.5 09-Jan-2020 14:00:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -170,6 +170,9 @@ popupmenu_SegProcessIndex_Callback(hObject, eventdata, handles)
 %Update channel parameter selection dropdown
 popupmenu_CurrentChannel_Callback(hObject, eventdata, handles)
 
+% Add Scales parameter to the GUI
+set(handles.edit_scales, 'String',num2str(funParams.scales))
+
 
 if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
   % Set up available Build Dyn ROI channels
@@ -194,8 +197,10 @@ if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
   DynROIProcString = vertcat('Choose later',DynROIProcNames(:));
   DynROIProcData=horzcat({[]},num2cell(DynROIProcID));
   DynROIProcValue = find(cellfun(@(x) isequal(x,funParams.processBuildDynROI),userData.MD.processes_(DynROIProc)));
-  if isempty(DynROIProcValue)
+  if isempty(DynROIProcValue) && isempty(DynROIProcID)
       DynROIProcValue = 1; 
+  elseif isempty(DynROIProcValue) && ~isempty(DynROIProcID) % make first available DynROIProc selected&set on the GUI, even funParams.processBuildDynROI = [].
+      DynROIProcValue = 2;
   else
       DynROIProcValue = DynROIProcValue+1; 
   end
@@ -206,7 +211,7 @@ if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
   popupmenu_BuildDynROIProcessIndex_Callback(hObject, eventdata, handles)
 else
   uipanel_DynROIProc_posi = get(handles.uipanel_DynROIProc, 'Position');
-  widthDiff = uipanel_DynROIProc_posi(3) + 10;
+  widthDiff = uipanel_DynROIProc_posi(3);
   delete(handles.uipanel_DynROIProc);
   set(handles.figure1, 'Position', (get(handles.figure1,'position') - [0 0 widthDiff 0]));
 end
@@ -269,6 +274,13 @@ if isempty(get(handles.listbox_selectedChannels, 'String'))
     return;
 end
 
+if any(isnan(str2num(get(handles.edit_scales, 'String')))) ...
+    || any(str2num(get(handles.edit_scales, 'String')) < 0) ...
+    || isempty(get(handles.edit_scales, 'String'))
+  errordlg('Please provide a valid input for ''Scales''.','Setting Error','modal');
+  return;
+end
+
 %Save the currently set per-channel parameters
 pushbutton_saveChannelParams_Callback(hObject, eventdata, handles)
 
@@ -318,6 +330,9 @@ if isequal(userData.procConstr, @PointSourceDetectionProcess3DDynROI)
     funParams.processBuildDynROI = [];
   end
 end
+
+% Add Scales parameter to the GUI
+funParams.scales = str2num(get(handles.edit_scales, 'String'));
 
 % Add 64-bit warning
 is64bit = ~isempty(regexp(computer ,'64$', 'once'));
@@ -731,6 +746,9 @@ end
 selType = get(handles.edit_algorithmType, 'Value'); 
 algoType = PointSourceDetectionProcess3D.getValidAlgorithmTypes{selType};
 
+
+set(handles.edit_isoCoord, 'enable','on');
+
 if any(ismember(algoType,{'watershedApplegateAuto', ...
                       'watershedApplegate',...
                       'bandPassWatershed',...
@@ -751,14 +769,26 @@ elseif any(ismember(algoType,{'pointSourceLM',...
                               'pointSourceAutoSigmaMixture',... 
                               'pointSourceAutoSigmaLM',...     
                               'pointSourceAutoSigmaFitSig',... 
-                              'pSAutoSigmaWatershed',...
-                              'multiscaleDetectionDebug'}))
+                              'pSAutoSigmaWatershed'}))
 
     children = get(handles.uipanel_pointSource,'Children');
     set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','on')
     
     children = get(handles.uipanel_water,'Children');
     set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','off')
+
+elseif any(ismember(algoType,{'multiscaleDetectionDebug'}))
+
+    children = get(handles.uipanel_pointSource,'Children');
+    set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','off');
+    children = get(handles.uipanel_water,'Children');
+    set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','off');
+
+    set(handles.text_alpha, 'enable','on');
+    set(handles.edit_alpha, 'enable','on');
+    set(handles.text_scales, 'enable','on');
+    set(handles.edit_scales, 'enable','on');
+    set(handles.edit_isoCoord, 'enable','off');
                           
 end
 
@@ -983,7 +1013,9 @@ function edit_algorithmType_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from edit_algorithmType
     selType = get(handles.edit_algorithmType, 'Value'); 
     algoType = PointSourceDetectionProcess3D.getValidAlgorithmTypes{selType};
+ 
     
+set(handles.edit_isoCoord, 'enable','on');
 
 if any(ismember(algoType,{'watershedApplegateAuto', ...
                       'watershedApplegate',...
@@ -1004,14 +1036,26 @@ elseif any(ismember(algoType,{'pointSourceLM',...
                               'pointSourceAutoSigmaMixture',... 
                               'pointSourceAutoSigmaLM',...     
                               'pointSourceAutoSigmaFitSig',... 
-                              'pSAutoSigmaWatershed',...
-                              'multiscaleDetectionDebug'}))
+                              'pSAutoSigmaWatershed'}))
 
     children = get(handles.uipanel_pointSource,'Children');
     set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','on');
     children = get(handles.uipanel_water,'Children');
     set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','off');
-                          
+  
+elseif any(ismember(algoType,{'multiscaleDetectionDebug'}))
+
+    children = get(handles.uipanel_pointSource,'Children');
+    set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','off');
+    children = get(handles.uipanel_water,'Children');
+    set(children(strcmpi ( get (children,'Type'),'UIControl')),'enable','off');
+
+    set(handles.text_alpha, 'enable','on');
+    set(handles.edit_alpha, 'enable','on');
+    set(handles.text_scales, 'enable','on');
+    set(handles.edit_scales, 'enable','on');
+    set(handles.edit_isoCoord, 'enable','off');
+
 end
 
         
@@ -1562,6 +1606,29 @@ function edit_filterSigmaZ_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function edit_filterSigmaZ_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_filterSigmaZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_scales_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_scales (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_scales as text
+%        str2double(get(hObject,'String')) returns contents of edit_scales as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_scales_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_scales (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

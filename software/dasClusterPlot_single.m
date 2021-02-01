@@ -1,18 +1,18 @@
 
 
-function [] = dasClusterPlot_single(z , edges, var_name,varargin)
+function [] = dasClusterPlot_single(z , edges, var_name, pm, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
 ip.addRequired('z', @(x) isnumeric(x));
 ip.addRequired('edges', @(x) iscell(x));
 ip.addRequired('var_name', @(x) iscell(x));
+ip.addRequired('pm', @(x) isstruct(x));
 ip.addParameter('fix_cluster_num', 2, @isnumeric);
 ip.addParameter('fig_exist', [], @ishandle);
-ip.addParameter('map_col', 'jet', @ischar);
 ip.addParameter('is_diff', false, @islogical);
 ip.addParameter('alt_norm', 1, @isnumeric);
-ip.parse(z, edges, var_name, varargin{:});
+ip.parse(z, edges, var_name, pm, varargin{:});
 
 
 z = ip.Results.z;
@@ -20,12 +20,11 @@ var_name = ip.Results.var_name;
 
 edges = ip.Results.edges;
 fig_exist = ip.Results.fig_exist;
-map_col = ip.Results.map_col;
 is_diff = ip.Results.is_diff;
 alt_norm = ip.Results.alt_norm;
 %==========================================================================
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -61,7 +60,7 @@ figure(fig_cluster)
    if is_diff
        colormap('hot');
    else
-       colormap(map_col);
+       colormap(pm.col_map);
    end
    if is_diff
        z_tem = z/alt_norm;
@@ -71,9 +70,9 @@ figure(fig_cluster)
    if is_diff
        z_tem(1) = min(v_cont);
        z_tem(end) = max(v_cont);
-       contourf(edges{2},edges{1},z_tem,v_cont,':','LineWidth', 0.1);
+       contourf(edges{2},edges{1},z_tem,v_cont,'Linestyle', 'none');
    else
-       contourf(edges{2},edges{1},z_tem,v_cont,'-','LineWidth', 1);
+       contourf(edges{2},edges{1},z_tem,v_cont,'Linestyle', 'none');
    end
    if is_diff
    xlim([min(edges{2}(2:end-1)) max(edges{2}(2:end-1))]);ylim([min(edges{1}(2:end-1)) max(edges{1}(2:end-1))]);  

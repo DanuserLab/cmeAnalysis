@@ -2,7 +2,7 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
 %PointSourceDetectionProcess3D is a concrete class of a point source
 %detection process for 3d
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -65,7 +65,12 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
             projAxis3D = ip.Results.projectionAxis3D;
             iZ = ip.Results.iZ;
             varargout = cell(numel(output), 1);
-            ZXRatio = obj.owner_.pixelSizeZ_/obj.owner_.pixelSize_;              
+            ZXRatio = obj.owner_.pixelSizeZ_/obj.owner_.pixelSize_;   
+            if isa(obj,'PointSourceDetectionProcess3DDynROI')
+                s = cached.load(obj.funParams_.processBuildDynROI.outFilePaths_{3,1}, '-useCache', true);
+                s1 = cached.load(s.movieDataDynROICell{1}, '-useCache', true); % s1.MD is a movieData built based on DynROI raw images.
+                ZXRatio = s1.MD.pixelSizeZ_/s1.MD.pixelSize_;
+            end
 
             if ischar(output),output={output}; end
             
@@ -130,7 +135,7 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
                         end
                         if ~isempty(v1.xCoord) && ~isempty(iZ)
                             % Only show Detections in Z. 
-%                             zThick = 1;
+                            % zThick = 1;
                             tt = table(v1.xCoord(:,1), v1.yCoord(:,1), v1.zCoord(:,1), 'VariableNames', {'xCoord','yCoord','zCoord'});
                             valid_states = ((tt.zCoord/ZXRatio)>=1 & (tt.zCoord/ZXRatio)<=obj.owner_.zSize_);
                             dataOut = tt{:, :};
@@ -211,9 +216,11 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
             funParams.frameRange=[1 owner.nFrames_];
             
 %             types = PointSourceDetectionProcess3D.getDetectionTypeOptions;
-            funParams.algorithmType = {'pointSourceAutoSigmaFit'};
+            % funParams.algorithmType = {'pointSourceAutoSigmaFit'};
+            funParams.algorithmType = {'multiscaleDetectionDebug'}; % Change the default for NewUtrack3DPackage, on 2020-11-25
 
-            funParams.alpha=.05;
+            % funParams.alpha=.05;
+            funParams.alpha=.001; % Change the default for NewUtrack3DPackage, on 2020-11-25
             funParams.Mode = {'xyzAc'};
             funParams.FitMixtures = false;
             funParams.MaxMixtures = 5;
@@ -230,7 +237,8 @@ classdef PointSourceDetectionProcess3D < DetectionProcess & NonSingularProcess
 
             %% multiscale detector
             funParams.debug=false;
-            funParams.scales=[2:0.5:4];
+            % funParams.scales=[2:0.5:4];
+            funParams.scales=[1.25:0.5:2.25]; % Change the default for NewUtrack3DPackage, on 2020-11-25
             funParams.version='';
             
             % DetectComets3D & watershed params

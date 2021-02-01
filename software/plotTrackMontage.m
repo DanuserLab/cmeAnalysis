@@ -8,7 +8,7 @@
 % [stack, xa, ya] = getTrackStack(data, track, 'WindowWidth', 6);
 % plotTrackMontage(track, stack, xa, ya, 'Labels', data.markers);
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

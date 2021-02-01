@@ -4,7 +4,7 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
     %
     % June 2018, Mark Kittisopikul implemented minimal 2D mode
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -63,6 +63,7 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
                 obj(i).labels=setfield(obj(i).labels,labelName,values{i});
 ,           end
         end
+
 
         function values=getLabel(obj,labelName)
             values=cell(1,numel(obj));
@@ -404,6 +405,19 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
             end
         end     
 
+
+
+        function obj= appendPos(obj, XYZ,amp,XYZErr,ampErr)
+           nDet=numel(obj);
+            for i=1:nDet
+                obj(i).xCoord=[obj(i).xCoord; [XYZ(1) XYZErr(1)]];
+                obj(i).yCoord=[obj(i).yCoord; [XYZ(2) XYZErr(2)]];
+                obj(i).zCoord=[obj(i).zCoord; [XYZ(3) XYZErr(3)]];
+                obj(i).amp=[obj(i).amp; [amp ampErr]];
+            end
+        end
+
+
         function [detIndexCell,objIndexCell]=findCloseDetections(obj,det,radii)
             % Find the point in det that are with in a radius from obj.
             % contract: obj and dets have same size
@@ -658,10 +672,11 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
                     det.addprop('rho');          
                 catch
                 end
+                if(~isempty(det.xCoord))
                 [det.azimuth,det.elevation,det.rho]=cart2sph(det.xCoord(:,1), ... 
                                                     det.yCoord(:,1), ...
                                                     det.zCoord(:,1));
-    
+                end
             end    
         end
 
@@ -871,7 +886,11 @@ classdef Detections <  handle  & matlab.mixin.Copyable & dynamicprops
                     end
                 end
             else
-                assert(numel(obj)==numel(indices));
+                if(numel(obj)>numel(indices))
+                    indices=[indices cell(1,numel(obj)-numel(indices))];
+                else
+                    indices=indices(1:numel(obj));
+                end
                 arrayfun(@(i) selectIdx(obj(i),indices{i}),1:numel(indices),'unif',0);
             end
         end        

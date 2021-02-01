@@ -20,7 +20,7 @@ function varargout = trackingProcessGUI(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -172,8 +172,10 @@ if isequal(userData.procConstr, @TrackingDynROIProcess)
   DynROIProcString = vertcat('Choose later',DynROIProcNames(:));
   DynROIProcData=horzcat({[]},num2cell(DynROIProcID));
   DynROIProcValue = find(cellfun(@(x) isequal(x,funParams.processBuildDynROI),userData.MD.processes_(DynROIProc)));
-  if isempty(DynROIProcValue)
+  if isempty(DynROIProcValue) && isempty(DynROIProcID)
       DynROIProcValue = 1; 
+  elseif isempty(DynROIProcValue) && ~isempty(DynROIProcID) % make first available DynROIProc selected&set on the GUI, even funParams.processBuildDynROI = [].
+      DynROIProcValue = 2;
   else
       DynROIProcValue = DynROIProcValue+1; 
   end

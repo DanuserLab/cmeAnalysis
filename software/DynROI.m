@@ -2,6 +2,7 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
 
     properties (SetAccess = public, GetAccess = public)
         defaultRef; % If the ROI if 1D or 2D, it will generate a default frame of reference. 
+        swapDynROIMDFile;
     end
     methods
     function obj = setDefaultRef(obj,ref)
@@ -22,7 +23,7 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
         %% In a first version, the mask is built using the mapPosition function.
         %% Every pixel in the boundingbox is transformed as a position 
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -171,9 +172,11 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
         MDout.sanityCheck(); % the usual fucking performance killer...
         MDout.save();
         MDFile=[p.outputDir filesep 'analysis' filesep 'movieData.mat'];
+        obj.swapDynROIMDFile=MDFile;
     end
     
     function [subVol,minCoord,maxCoord] = getSubVol(obj,vol,ZXRatio,frameIdx)
+
         % The intrinsic coordinate values (x,y,z) of the center point of any
         % pixel are identical to the values of the column, row, and plane
         % subscripts for that pixel. For example, the center point of the
@@ -219,15 +222,15 @@ classdef DynROI < hgsetget & matlab.mixin.Copyable & handle
         minZBorderCurr=(minZBorder);
         maxZBorderCurr=(maxZBorder);
         
-        rotOutputRef=imref3d([  (maxYBorderCurr-minYBorderCurr)                       ...
-                                (maxXBorderCurr-minXBorderCurr)                       ...
-                                (maxZBorderCurr-minZBorderCurr) ],                    ...
+        rotOutputRef=imref3d([  ceil(maxYBorderCurr-minYBorderCurr)                       ...
+                                ceil(maxXBorderCurr-minXBorderCurr)                       ...
+                                ceil(maxZBorderCurr-minZBorderCurr) ],                    ...
                                 [minXBorderCurr maxXBorderCurr], ...
                                 [minYBorderCurr maxYBorderCurr], ...
                                 [minZBorderCurr maxZBorderCurr]);
         A=ref.getAffineTransform(frameIdx);
-        A.T
-        B=ref.getBase(frameIdx)
+        % A.T
+        B=ref.getBase(frameIdx);
         tformRotOnly=affine3d();
         tformRotOnly.T(1:3,1:3)=B(:,[1 2 3]);
         subVol=imwarp(vol,inputRef,tformRotOnly,'OutputView',rotOutputRef);

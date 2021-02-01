@@ -8,6 +8,8 @@ function RGBVol=renderChannel(ch1,ch2,type,varargin)
             RGBVol=greenRedRender(ch1,ch2);
         case 'stereo'
             RGBVol=uint8(255*sc(cat(3,ch1,ch2),'stereo'));
+        case 'stereoNoRenorm'
+            RGBVol=uint8(255*sc(cat(3,ch1,ch2),[0 255],'stereo'));
         case 'stereoInv'
             RGBVol=uint8(255*sc(cat(3,ch2,ch1),'stereo'));
         case 'testMix'
@@ -15,6 +17,10 @@ function RGBVol=renderChannel(ch1,ch2,type,varargin)
             RGBVol=uint8(255*img);
         case 'grayRedMix'
             img=sc(ch1,'gray')+sc(ch2,'gray').*sc(ch2,'-autumn');
+            RGBVol=uint8(255*img);
+        case 'grayRedMix2'
+            deepRed=linspaceNDim([0 0 0],[255 0 0],256)';
+            img=sc(ch1,'gray')+sc(ch2,'gray').*sc(ch2,deepRed);
             RGBVol=uint8(255*img);
         case 'redGrayMix'
             img=sc(ch2,'gray')+sc(ch1,'gray').*sc(ch1,'-autumn');
@@ -32,7 +38,7 @@ function RGBVol=greenRedRender(greenCh,redCh)
     RGBVol=repmat(greenCh,1,1,3);
     %RGBThree(:,:,1)=max(rMaxXY,rmaxXYKin);
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

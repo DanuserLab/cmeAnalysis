@@ -1,41 +1,39 @@
 
 
-function [figH] = dasFigure1(data, DAS_all,Track_info, DAS_stat, idx, con_name,dir_alt, pm, varargin)
+function [figH] = dasFigure1(DAS_all,Track_info, DAS_stat, idx, pm, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('data', @(x) iscell(x));
 ip.addRequired('DAS_all', @(x) iscell(x));
 ip.addRequired('Track_info', @(x) iscell(x));
 ip.addRequired('DAS_stat', @(x) iscell(x));
 ip.addRequired('idx', @(x) iscell(x));
-ip.addRequired('con_name', @(x) iscell(x));
-ip.addRequired('dir_alt', @(x) ischar(x));
 ip.addRequired('pm', @(x) isstruct(x));
 ip.addParameter('fix_cluster_num', 2, @isnumeric);
 ip.addParameter('i_condition', 1, @isnumeric);
-ip.addParameter('col_scatter', [0 1 1], @isnumeric);
+ip.addParameter('col_scatter', [0 0 1], @isnumeric);
 ip.addParameter('fig_name', 'fig1', @ischar);
 ip.addParameter('col_scatter_edge', [0 0 1], @isnumeric);
-ip.parse(data, DAS_all, Track_info,DAS_stat, idx, con_name,dir_alt, pm, varargin{:});
+ip.addParameter('a_scatter', 0.5, @isnumeric);
+ip.parse(DAS_all, Track_info,DAS_stat, idx, pm, varargin{:});
 
 
 DAS_all = ip.Results.DAS_all;
-con_name = ip.Results.con_name;
-num_condition = max(size(DAS_all));
 idx = ip.Results.idx;
-data = ip.Results.data;
-dir_alt = ip.Results.dir_alt;
+
+
 Track_info = ip.Results.Track_info;
 DAS_stat = ip.Results.DAS_stat;
 i_condition = ip.Results.i_condition;
 fig_name = ip.Results.fig_name;
 pm = ip.Results.pm;
+data = pm.data_all;
 col_scatter = ip.Results.col_scatter;
 col_scatter_edge = ip.Results.col_scatter_edge;
+a_scatter = ip.Results.a_scatter;
 %==========================================================================
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -55,6 +53,7 @@ col_scatter_edge = ip.Results.col_scatter_edge;
 % 
 figH = cell(3,1);
 %==========================================================================
+if strcmp(pm.fig_disp_mod, 'default')
 desktop = com.mathworks.mde.desk.MLDesktop.getInstance;
 desktop.addGroup(fig_name);
 desktop.setGroupDocked(fig_name, 0);
@@ -70,6 +69,13 @@ for iFig = 1:n_fig
 end
 warning(bakWarn);
 desktop.setDocumentArrangement(fig_name, 2, myDim)
+elseif strcmp(pm.fig_disp_mod, 'single')
+n_fig = 9;
+figH{1}    = gobjects(n_fig, 1);
+for iFig = 1:n_fig
+   figH{1}(iFig) = figure;
+end
+end
 %==========================================================================
 num_clus =3;
 %==========================================================================
@@ -123,6 +129,7 @@ else
     ylabel('Prob. Density');xlabel('$\tau$ (s)','interpreter','latex')
 end
 %==========================================================================
+if pm.pdf_conf == false
 figure(figH{1}(4));
 line(DAS_stat{i_condition}.d,DAS_stat{i_condition}.pdf_d,'Color','k','Linewidth',1)
 ylabel('Prob. Density');xlabel(label2,'interpreter','latex')
@@ -138,13 +145,65 @@ line(DAS_stat{i_condition}.d32,DAS_stat{i_condition}.pdf_d32,'Color','k','Linewi
 ylabel('Prob. Density');xlabel(label3,'interpreter','latex')
 set(gca,'Linewidth',1) 
 xlim([-3 3])
+else
+    curvs = cell(3,1);
+    n_mov = max(DAS_all{1}.MovieNum);
+    var = cell(3, 1);
+for i_curvs = 1:3
+    var{i_curvs} = cell(1,n_mov);  
+    for i_mov = 1:n_mov
+        id_tem = DAS_all{1}.MovieNum == i_mov;
+        if i_curvs == 1
+           var{i_curvs}{i_mov} = DAS_all{1}.DAS(id_tem);
+        elseif i_curvs == 2
+           var{i_curvs}{i_mov} = DAS_all{1}.DAS_var(id_tem);
+        else
+           var{i_curvs}{i_mov} = DAS_all{1}.DAS_3(id_tem)./sqrt(DAS_all{1}.DAS_2(id_tem)).^3;
+        end
+    end
+end
+for i_curvs = 1:3  
+[fig_pdf] = plotPDFconf(var{i_curvs},cell(0,0),'BoundedSupport',[],'num_condition',1);
+%-------------------------------------------------------------------------------
+axes_to_be_copied = findobj(fig_pdf{7},'type','axes');
+chilred_to_be_copied = get(axes_to_be_copied,'children');
+
+h = findobj(chilred_to_be_copied,'Type','line');
+curvs{i_curvs} = [h(1).XData;h(1).YData;h(2).YData;h(3).YData];
+%-------------------------------------------------------------------------------
+close(fig_pdf{:})
+end
+%==========================================================================
+%%
+for i_curvs = 1:3
+    figure(figH{1}(i_curvs+3)); hold on;
+    plot(curvs{i_curvs}(1,:),curvs{i_curvs}(2,:),'Color',[0 0 0],'Linewidth',1.5);
+
+    x = curvs{i_curvs}(1,:);
+    y1 = curvs{i_curvs}(3,:);
+    y2 = curvs{i_curvs}(4,:);
+    fill([x fliplr(x)],[y1 fliplr(y2)],[0 0 0],'FaceAlpha',0.4,'EdgeAlpha',0);
+    plot(curvs{i_curvs}(1,:),curvs{i_curvs}(2,:),'Color',[0 0 0],'Linewidth',1.5);
+    
+    set(gca,'Linewidth',1); set(gca,'FontSize',8);
+    ylabel('Prob. Density');
+    if i_curvs == 1
+        xlabel('$d_1$','interpreter','latex'); xlim([-1.5 1])
+    elseif i_curvs == 2
+        xlabel('$d_2$','interpreter','latex'); xlim([-5 0])
+    else
+        xlabel('$d_2$','interpreter','latex'); xlim([-3 3])
+    end
+end
+
+end
 %==========================================================================
 %==========================================================================
-dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},'fig_exist',figH{1}(7));
+dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},pm,'fig_exist',figH{1}(7));
 dasClusterPlot_single(DAS_stat{i_condition}.z_d_d32, DAS_stat{i_condition}.edges_d_d32, ...
-    {label1,label3},'fig_exist',figH{1}(8));
+    {label1,label3},pm,'fig_exist',figH{1}(8));
 dasClusterPlot_single(DAS_stat{i_condition}.z_d32_dv, DAS_stat{i_condition}.edges_d32_dv, ...
-    {label3,label2},'fig_exist',figH{1}(9));
+    {label3,label2},pm,'fig_exist',figH{1}(9));
 %==========================================================================
 % dasClusterPlot_single_contour(DAS_all{i_condition}.DAS_var, DAS_all{i_condition}.DAS , idx{i_condition},DAS_stat{i_condition}.edges_d_dv, {label1,label2},'fig_exist',figH{1}(10));
 % dasClusterPlot_single_contour(DAS_all{i_condition}.DAS_3./sqrt(DAS_all{i_condition}.DAS_2).^3, DAS_all{i_condition}.DAS , idx{i_condition}, DAS_stat{i_condition}.edges_d_d32,...
@@ -157,21 +216,23 @@ figure(figH{1}(3));
 
 dasComputeD(data{1}, Track_info,[1 0],pm,DAS_all{1}.ImaxAll,'plotD', true,'fig_exist',figH{1}(3));
 hold on;
-id_temp = (DAS_all{1}.MovieNum==1) & (DAS_all{1}.LT==30) & (idx{1} == 1);
+lt_tem = 20;
+id_temp = (DAS_all{1}.MovieNum==1) & (DAS_all{1}.LT==lt_tem) & (idx{1} == 1);
 id_temp = DAS_all{1}.TrackID(id_temp);
 i_tem=randsample(max(size(id_temp)),1);
-plot(1:30,Track_info{1}.A(id_temp(i_tem),1:30),'linewidth',1,'color',pm.color_clus{1},...
+plot(1:lt_tem,Track_info{1}.A(id_temp(4),1:lt_tem),'linewidth',1,'color',pm.color_clus{1},...
     'Marker','o',...
     'LineWidth',1,...
     'MarkerSize',1,...
     'MarkerEdgeColor',pm.color_clus{1},...
     'MarkerFaceColor',pm.color_clus{1})
-% Track_info{1}.A(id_temp(6),1:lt_tem) for paper (Zhiming 171219 ctrl)
-id_temp = (DAS_all{1}.MovieNum==1) & (DAS_all{1}.LT==10) & (idx{1} == 3);
+% Track_info{1}.A(id_temp(4),1:lt_tem) for paper (Zhiming 171219 ctrl)
+lt_tem = 20;
+id_temp = (DAS_all{1}.MovieNum==1) & (DAS_all{1}.LT==lt_tem) & (idx{1} == 3);
 id_temp = DAS_all{1}.TrackID(id_temp);
 hold on;
 i_tem=randsample(max(size(id_temp)),1);
-plot(1:10,Track_info{1}.A(id_temp(i_tem),1:10),'linewidth',1,'color',pm.color_clus{3},...
+plot(1:lt_tem,Track_info{1}.A(id_temp(3),1:lt_tem),'--','linewidth',1,'color',pm.color_clus{3},...
     'Marker','o',...
     'LineWidth',1,...
     'MarkerSize',1,...
@@ -183,7 +244,7 @@ id_temp = (DAS_all{1}.MovieNum==1) & (DAS_all{1}.LT==lt_tem) & (idx{1} == 2);
 id_temp = DAS_all{1}.TrackID(id_temp);
 hold on;
 i_tem=randsample(max(size(id_temp)),1);
-plot(1:lt_tem,Track_info{1}.A(id_temp(i_tem),1:lt_tem),'linewidth',1,'color',pm.color_clus{2},...
+plot(1:lt_tem,Track_info{1}.A(id_temp(8),1:lt_tem),':','linewidth',1,'color',pm.color_clus{2},...
     'Marker','o',...
     'LineWidth',1,...
     'MarkerSize',1,...
@@ -191,6 +252,7 @@ plot(1:lt_tem,Track_info{1}.A(id_temp(i_tem),1:lt_tem),'linewidth',1,'color',pm.
     'MarkerFaceColor',pm.color_clus{2})
 % Track_info{1}.A(id_temp(8),1:lt_tem) for paper (Zhiming 171219 ctrl)
 %==========================================================================
+if strcmp(pm.fig_disp_mod, 'default')
 desktop = com.mathworks.mde.desk.MLDesktop.getInstance;
 desktop.addGroup([fig_name '_2']);
 desktop.setGroupDocked([fig_name '_2'], 0);
@@ -206,6 +268,13 @@ for iFig = 1:n_fig
 end
 warning(bakWarn);
 desktop.setDocumentArrangement([fig_name '_2'], 2, myDim)
+elseif strcmp(pm.fig_disp_mod, 'single')
+n_fig = 8;
+figH{2}    = gobjects(n_fig, 1);
+for iFig = 1:n_fig
+   figH{2}(iFig) = figure;
+end
+end
 %==========================================================================
 %==========================================================================
 for iFig = 1:n_fig
@@ -242,15 +311,15 @@ line(DAS_stat{i_condition}.Imax,DAS_stat{i_condition}.pdf_Imax,'Color','k','Line
     figure(figH{2}(1));  
     xlim([5 100]);
     line(DAS_stat{i_condition}.LT1,DAS_stat{i_condition}.pdf_LT1*DAS_stat{i_condition}.prop_c(1),'Color',color_clus{1},'Linewidth',2); hold on
-    line(DAS_stat{i_condition}.LT2,DAS_stat{i_condition}.pdf_LT2*DAS_stat{i_condition}.prop_c(2),'Color',color_clus{2},'Linewidth',2); hold on
-    line(DAS_stat{i_condition}.LT3,DAS_stat{i_condition}.pdf_LT3*DAS_stat{i_condition}.prop_c(3),'Color',color_clus{3},'Linewidth',2); hold on
+    line(DAS_stat{i_condition}.LT2,DAS_stat{i_condition}.pdf_LT2*DAS_stat{i_condition}.prop_c(2),'Color',color_clus{2},'Linewidth',2,'LineStyle',':'); hold on
+    line(DAS_stat{i_condition}.LT3,DAS_stat{i_condition}.pdf_LT3*DAS_stat{i_condition}.prop_c(3),'Color',color_clus{3},'Linewidth',2,'LineStyle','--'); hold on
 
     
     figure(figH{2}(3));
     xlim([0 200]);
     line(DAS_stat{i_condition}.Imax1,DAS_stat{i_condition}.pdf_Imax1*DAS_stat{i_condition}.prop_c(1),'Color',color_clus{1},'Linewidth',2); hold on
-    line(DAS_stat{i_condition}.Imax2,DAS_stat{i_condition}.pdf_Imax2*DAS_stat{i_condition}.prop_c(2),'Color',color_clus{2},'Linewidth',2); hold on
-    line(DAS_stat{i_condition}.Imax3,DAS_stat{i_condition}.pdf_Imax3*DAS_stat{i_condition}.prop_c(3),'Color',color_clus{3},'Linewidth',2); hold on
+    line(DAS_stat{i_condition}.Imax2,DAS_stat{i_condition}.pdf_Imax2*DAS_stat{i_condition}.prop_c(2),'Color',color_clus{2},'Linewidth',2,'LineStyle',':'); hold on
+    line(DAS_stat{i_condition}.Imax3,DAS_stat{i_condition}.pdf_Imax3*DAS_stat{i_condition}.prop_c(3),'Color',color_clus{3},'Linewidth',2,'LineStyle','--'); hold on
     
 
 
@@ -313,9 +382,9 @@ subplot(1,2,2);
 end
 xlim([0 30]); ylim([0 120]);
 figure(figH{2}(2));
-dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},'fig_exist',figH{2}(2));
+dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},pm,'fig_exist',figH{2}(2));
 hold on
-scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerEdgeColor',col_scatter_edge);alpha(1);
+scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerFaceAlpha',a_scatter,'MarkerEdgeColor',col_scatter_edge,'LineWidth',0.25);
 
 figure(figH{2}(6));
 dist_temp = sqrt((Z_norm(:,2)-DAS_stat{i_condition}.d_mod(3)).^2+(Z_norm(:,1)-DAS_stat{i_condition}.dv_mod(3)).^2);
@@ -336,11 +405,11 @@ end
 xlim([0 30]); ylim([0 120]);
 figure(figH{2}(2));
 
-scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerEdgeColor',col_scatter_edge);alpha(1);
+scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerFaceAlpha',a_scatter,'MarkerEdgeColor',col_scatter_edge,'LineWidth',0.25);
 %scatter(DAS_stat{i_condition}.d_mod(1), DAS_stat{i_condition}.dv_mod(1),100,'+','MarkerEdgeColor',[0 1 0],'LineWidth',3);hold on;
 %scatter(DAS_stat{i_condition}.d_mod(3), DAS_stat{i_condition}.dv_mod(3),100,'x','MarkerEdgeColor',[0 1 0],'LineWidth',3);hold on;
-scatter(DAS_stat{i_condition}.d_mod(1), DAS_stat{i_condition}.dv_mod(1),100,'o','MarkerEdgeColor',[1 1 1],'LineWidth',1);hold on;
-scatter(DAS_stat{i_condition}.d_mod(3), DAS_stat{i_condition}.dv_mod(3),100,'d','MarkerEdgeColor',[1 1 1],'LineWidth',1);hold on;
+scatter(DAS_stat{i_condition}.d_mod(1), DAS_stat{i_condition}.dv_mod(1),100,'o','MarkerEdgeColor',[1 0 1],'LineWidth',1);hold on;
+scatter(DAS_stat{i_condition}.d_mod(3), DAS_stat{i_condition}.dv_mod(3),100,'d','MarkerEdgeColor',[1 0 1],'LineWidth',1);hold on;
 %dasClusterPlot_single_contour(DAS_all{i_condition}.DAS_var, DAS_all{i_condition}.DAS , idx{i_condition},DAS_stat{i_condition}.edges_d_dv, {label1,label2},'fig_exist',figH{2}(2),'contour_only',true);
 %==========================================================================
 figure(figH{2}(7));
@@ -362,13 +431,13 @@ subplot(1,2,2);
 end
 xlim([0 70]); ylim([0 120]);
 figure(figH{2}(4));
-dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},'fig_exist',figH{2}(4));
+dasClusterPlot_single(DAS_stat{i_condition}.z_d_dv, DAS_stat{i_condition}.edges_d_dv, {label2,label1},pm,'fig_exist',figH{2}(4));
 hold on
-scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerEdgeColor',col_scatter_edge);alpha(1);hold on;
+scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerFaceAlpha',a_scatter,'MarkerEdgeColor',col_scatter_edge,'LineWidth',0.25);hold on;
 %scatter(DAS_stat{i_condition}.d_mod(1), DAS_stat{i_condition}.dv_mod(1),100,'+','MarkerEdgeColor',[0 1 0],'LineWidth',3);hold on;
 %scatter(DAS_stat{i_condition}.d_mod(3), DAS_stat{i_condition}.dv_mod(3),100,'x','MarkerEdgeColor',[0 1 0],'LineWidth',3);hold on;
-scatter(DAS_stat{i_condition}.d_mod(1), DAS_stat{i_condition}.dv_mod(1),100,'o','MarkerEdgeColor',[1 1 1],'LineWidth',1);hold on;
-scatter(DAS_stat{i_condition}.d_mod(3), DAS_stat{i_condition}.dv_mod(3),100,'d','MarkerEdgeColor',[1 1 1],'LineWidth',1);hold on;
+scatter(DAS_stat{i_condition}.d_mod(1), DAS_stat{i_condition}.dv_mod(1),100,'o','MarkerEdgeColor',[1 0 1],'LineWidth',1);hold on;
+scatter(DAS_stat{i_condition}.d_mod(3), DAS_stat{i_condition}.dv_mod(3),100,'d','MarkerEdgeColor',[1 0 1],'LineWidth',1);hold on;
 
 figure(figH{2}(8));
 dist_temp = sqrt((Z_norm(:,2)-DAS_stat{i_condition}.d_mod(3)).^2+(Z_norm(:,1)-DAS_stat{i_condition}.dv_mod(3)).^2);
@@ -388,7 +457,7 @@ subplot(1,2,2);
 end
 xlim([0 70]); ylim([0 120]);
 figure(figH{2}(4));
-scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerEdgeColor',col_scatter_edge);alpha(1);
+scatter(Z2,Z1,'filled','SizeData',size_exp,'MarkerFaceColor',col_scatter,'MarkerFaceAlpha',a_scatter,'MarkerEdgeColor',col_scatter_edge,'LineWidth',0.25);
 hold on
 %dasClusterPlot_single_contour(DAS_all{i_condition}.DAS_var, DAS_all{i_condition}.DAS , idx{i_condition},DAS_stat{i_condition}.edges_d_dv, {label1,label2},'fig_exist',figH{2}(4),'contour_only',true);
 

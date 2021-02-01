@@ -5,6 +5,8 @@ function [pos,labelSeg,energyMap]=multiscaleStochasticFiltering(vol,XZRatio,vara
     ip.addParameter('scales',[2:0.5:4]);
     ip.addParameter('debug',false);
     ip.addParameter('samplePos',[])
+    ip.addParameter('RemoveRedundant',false);
+    ip.addParameter('RedundancyRadius',0.5);
     ip.addParameter('version','');
     ip.addParameter('alpha',0.05);
     ip.addParameter('deepakImplementation',false);
@@ -17,7 +19,7 @@ function [pos,labelSeg,energyMap]=multiscaleStochasticFiltering(vol,XZRatio,vara
 %% Set Scale Range for Detection
 % Adhesions setup - [1.1:0.1:4]
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -125,7 +127,6 @@ samples=p.samplePos.interpValue(maxResponseScale,[1 1 XZRatio]);
 p.samplePos.setLabel('maxResponseScale',samples);
 
 samples=p.samplePos.interpValue(voteMap,[1 1 XZRatio]);
-p.samplePos.setLabel('voteMap',samples);
 
 samples=p.samplePos.interpValue(energyMap,[1 1 XZRatio]);
 p.samplePos.setLabel('energyMap',samples);
@@ -148,9 +149,31 @@ p.samplePos.setLabel('maxResponseMap',val);
 % p.samplePos.setLabel('testMaps',val);
 end
 
-
-%% Volume rendering.
 pos=labelToMovieInfo(labelSeg,vol);
+
+% eliminate duplicate positions, keep the brightest
+if p.RemoveRedundant
+    if(~isempty(pos.xCoord))
+    posm=[pos.xCoord(:,1) pos.yCoord(:,1) pos.zCoord(:,1)];
+    amp=pos.amp(:,1);
+    idx=true(numel(amp),1);
+    idxKD = KDTreeBallQuery(posm, posm, p.RedundancyRadius*ones(size(pos,1),1));
+    idxKD = idxKD(cellfun(@numel, idxKD)>1);
+    for k = 1:length(idxKD);
+        localAmps = amp(idxKD{k});
+        idx(idxKD{k}(localAmps ~= max(localAmps))) = 0;
+    end
+    pos.xCoord=pos.xCoord(idx,:);
+    pos.yCoord=pos.yCoord(idx,:);
+    pos.zCoord=pos.zCoord(idx,:);
+    pos.amp=pos.amp(idx,:);
+end
+end 
+
+
+
+
+
 if(p.debug)
     disp('debug');
 %     figure();

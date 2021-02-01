@@ -6,6 +6,7 @@ ip.addRequired('data', @(x) isstruct(x));
 ip.addRequired('master_dir', @(x) ischar(x));
 ip.addParameter('saveTrack_info', true, @islogical);
 ip.addParameter('Category', {'Ia'}, @iscell);
+ip.addParameter('TimeThreshold', inf, @isnumeric);
 ip.parse(data, master_dir, varargin{:});
 
 data = ip.Results.data;
@@ -18,7 +19,7 @@ cd(master_dir);
 %    mkdir('DAS');
 % end
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -38,6 +39,7 @@ cd(master_dir);
 % 
 
 Category = ip.Results.Category;
+TimeThreshold = ip.Results.TimeThreshold;
 %--------------------------------------------------------------------------
 movie_num = max(size(data));
 %--------------------------------------------------------------------------
@@ -60,7 +62,7 @@ parfor i_movie = 1:movie_num
     nsb = numel(track(1).startBuffer.t);
     neb = numel(track(1).endBuffer.t);
 %--------------------------------------------------------------------------
-Track_info_child{i_movie}.Track_num = track_num;
+Track_info_child{i_movie}.Track_num = 0;
 Track_info_child{i_movie}.Valid = [];
 Track_info_child{i_movie}.LT = zeros(track_num,1);
 Track_info_child{i_movie}.Max = [];
@@ -75,7 +77,9 @@ Track_info_child{i_movie}.sbSigma_r = nan(track_num,nsb);
 Track_info_child{i_movie}.ebSigma_r = nan(track_num,neb);
 Track_info_child{i_movie}.Sigma_r = nan(track_num,frame_num);
 %--------------------------------------------------------------------------
-    for i_track = 1:track_num
+i_track = 1;
+    for i_tem = 1:track_num
+        if track(i_tem).t(1) < TimeThreshold
         Track_info_child{i_movie}.LT(i_track) = track(i_track).lifetime_s/Track_info_child{i_movie}.frameRate;
         %Track_info_child{i_movie}.Max(i_track) = max(track(i_track).A(2:n_ch,:));
         Track_info_child{i_movie}.A(i_track,1:Track_info_child{i_movie}.LT(i_track)) = track(i_track).A(2,1:Track_info_child{i_movie}.LT(i_track));
@@ -84,12 +88,26 @@ Track_info_child{i_movie}.Sigma_r = nan(track_num,frame_num);
         Track_info_child{i_movie}.ebA(i_track,:) = track(i_track).endBuffer.A(2,:);
         Track_info_child{i_movie}.sbSigma_r(i_track,:) = track(i_track).startBuffer.sigma_r(2,:);
         Track_info_child{i_movie}.ebSigma_r(i_track,:) = track(i_track).endBuffer.sigma_r(2,:);
+        Track_info_child{i_movie}.t(i_track,1:Track_info_child{i_movie}.LT(i_track)) = track(i_track).t(:);
+        Track_info_child{i_movie}.Track_num = Track_info_child{i_movie}.Track_num+1;  
+        i_track = i_track+1;
+        end
     end
-    %Track_info_child{i_movie}.A = squeeze(Track_info_child{i_movie}.A);
-    %Track_info_child{i_movie}.Sigma_r = squeeze(Track_info_child{i_movie}.Sigma_r);
 %--------------------------------------------------------------------------
 end
 %==========================================================================
+end
+for i_movie = 1:movie_num
+    n = Track_info_child{i_movie}.Track_num;
+Track_info_child{i_movie}.LT(n+1:end) = [];
+Track_info_child{i_movie}.A(n+1:end,:) = [];
+Track_info_child{i_movie}.sbA(n+1:end,:) = [];
+Track_info_child{i_movie}.ebA(n+1:end,:) = [];
+Track_info_child{i_movie}.sbSigma_r(n+1:end,:) = [];
+Track_info_child{i_movie}.ebSigma_r(n+1:end,:) = [];
+Track_info_child{i_movie}.Sigma_r(n+1:end,:) = [];
+Track_info_child{i_movie}.t(n+1:end,:) = [];
+Track_info_child{i_movie}.LT = Track_info_child{i_movie}.LT';
 end
 
 cd(master_dir); 

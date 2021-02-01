@@ -23,7 +23,7 @@ fig_exist = ip.Results.fig_exist;
 pm = ip.Results.pm;
 %==========================================================================
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -63,7 +63,7 @@ pair = cell(num_condition-1,1);
 for i_bar = 1:n_bar
     figure(fig_bar{1}(i_bar));
         if i_bar == 1
-            ylabel('CCP (min^{-1}{\mu}m^{-2})')
+            ylabel('CCP rate (min^{-1}{\mu}m^{-2})')
             ylim([0 0.3])
         elseif i_bar == 2
             ylabel('OT (min^{-1}{\mu} m^{-2})')
@@ -72,7 +72,7 @@ for i_bar = 1:n_bar
             ylabel('AP (min^{-1}{\mu}m^{-2})')
             ylim([0 0.4])
         elseif i_bar == 4
-            ylabel('CS initiation (min^{-1}{\mu}m^{-2})')
+            ylabel('CS init. (min^{-1}{\mu}m^{-2})')
             ylim([0 1.1])
         elseif i_bar == 5
             ylabel('CCP%')

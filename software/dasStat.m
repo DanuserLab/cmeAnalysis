@@ -1,18 +1,17 @@
 
-function [DAS_stat, idx] = dasStat(dir_alt, pm, DAS_all, varargin)
+function [DAS_stat, idx] = dasStat(pm, DAS_all, varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('dir_alt', @(x) ischar(x));
 ip.addRequired('pm', @(x) isstruct(x));
 ip.addRequired('DAS_all', @(x) iscell(x));
 ip.addParameter('d_bw', 0.05, @isnumeric);
 ip.addParameter('overwriteStat', false, @islogical);
-ip.parse(dir_alt, pm, DAS_all, varargin{:});
+ip.parse(pm, DAS_all, varargin{:});
 
 %--------------------------------------------------------------------------
 %
-% Copyright (C) 2019, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -31,9 +30,9 @@ ip.parse(dir_alt, pm, DAS_all, varargin{:});
 % 
 % 
 DAS_all = ip.Results.DAS_all;
-dir_alt = ip.Results.dir_alt;
 overwriteStat = ip.Results.overwriteStat;
 pm = ip.Results.pm;
+dir_alt = pm.dir_alt;
 %--------------------------------------------------------------------------
 num_condition = max(size(DAS_all));
 DAS_stat = cell(num_condition,1);
@@ -179,9 +178,9 @@ hold off
 close(gcf)
 end
 %================================================================================
-range_1 = (-5.5:0.5:0);
-range_2 = (-1.6:0.2:1); 
-range_3 = (-3:0.5:3);
+range_1 = (-5.5:0.2:0);
+range_2 = (-1.6:0.08:1); 
+range_3 = (-3:0.2:3);
 for i_condition = 1:num_condition
    Z=[DAS_all{i_condition}.DAS_var,DAS_all{i_condition}.DAS,DAS_all{i_condition}.DAS_3./sqrt(DAS_all{i_condition}.DAS_2).^3];
    %--------------------------------------------------------------------------
@@ -418,7 +417,7 @@ end
 %---------------------------------------
 end
 %================================================================================
-n_bar=pm.n_bar;
+n_bar=pm.n_bar+2;
 test_target = cell(n_bar,1);
     for i_bar = 1:n_bar
         test_target{i_bar} = cell(num_condition,1);
@@ -448,6 +447,8 @@ for i_condition = 1:num_condition
             test_target{5}{i_condition}(i_mov) = numel(DAS_all{i_condition}.LT(id_tem1))/numel(DAS_all{i_condition}.LT(id_all));
             end
             test_target{5}{i_condition}(i_mov) = test_target{5}{i_condition}(i_mov)*100;
+            test_target{6}{i_condition}(i_mov) = median(DAS_all{i_condition}.LT(id_tem1));
+            test_target{7}{i_condition}(i_mov) = median(DAS_all{i_condition}.MaxI(id_tem1));
     end
 end
 test_p = struct('test_target',[], 'p_all',[]);
