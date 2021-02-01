@@ -540,7 +540,7 @@ else
     set([trackCheckbox trackChoice trackRangeButton gapCheckbox trackEventCheckbox eapCheckbox], 'Enable', 'off');
     set([montageAlignCheckbox montageMarkerCheckbox montageDetectionCheckbox montageButton], 'Enable', 'off');
     %set(handles.montagePanel, 'Visible', 'off');
-    
+    hLegend = 0; %fixes error in MATLAB2019b onwards
     set(hLegend, 'Visible', 'off');
     set([tplotText tplotUnitChoice tplotBackgroundCheckbox tplotOverlayCheckbox tplotScaleCheckbox tplotRangeCheckbox], 'Enable', 'off');
 end
