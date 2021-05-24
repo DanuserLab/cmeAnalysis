@@ -228,4 +228,4 @@ if ~iscell(data.framePaths{1})
     end
 end
 
-save([data.channels{mCh} 'Detection' filesep 'detection_v2.mat'], 'frameInfo');
+save([data.channels{mCh} 'Detection' filesep 'detection_v2.mat'], 'frameInfo','-v7.3');

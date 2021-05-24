@@ -870,7 +870,7 @@ if isunix
     end
 end
 processingInfo.procFlag = [preprocess postprocess];
-save([data.source 'Tracking' filesep opts.FileName], 'tracks', 'processingInfo');
+save([data.source 'Tracking' filesep opts.FileName], 'tracks', 'processingInfo','-v7.3');
 
 
 
