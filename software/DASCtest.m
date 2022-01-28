@@ -2,7 +2,7 @@
 % Qiongjing (Jenny) Zou, March 2020
 % Test DASC test
 %
-% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

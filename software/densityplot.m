@@ -13,7 +13,7 @@
 %           'Parent' : handle of the parent axes
 %  'DisplayFunction' : intensity mapping, i.e., @sqrt
 %
-% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

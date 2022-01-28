@@ -6,7 +6,7 @@
 %         colors   : Overlay colors (cell array of 3-element RGB vectors).
 %         {iRange} : dynamic range of 'img'.
 %
-% Copyright (C) 2021, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
