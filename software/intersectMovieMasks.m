@@ -198,7 +198,8 @@ outMask=@(frame) [p.OutputDirectory filesep 'intersected_mask_' numStr(frame) '.
 
 % Redefine mask names
 for j= 1:nFrames
-    mask = true(movieData.imSize_);
+    % mask = true(movieData.imSize_);
+    mask = true(size(imread(inMask(1,j)))); % make it work for cropped images
     for i = 1:numel(p.ChannelIndex)
         mask = mask & logical(imread(inMask(i,j)));
     end
