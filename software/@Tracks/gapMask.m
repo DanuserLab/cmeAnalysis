@@ -1,7 +1,7 @@
 function [ varargout ] = gapMask( obj )
 %gapMask creates a binary mask of where gaps are in the compound track
 %
-% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

@@ -15,7 +15,7 @@ function fImg = locmax2d(img, mask, keepFlat)
 %
 %    OUTPUT   fImg   image with local maxima (original values) and zeros elsewhere.
 %
-% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

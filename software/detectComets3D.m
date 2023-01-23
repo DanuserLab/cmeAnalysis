@@ -34,7 +34,7 @@ function [movieInfo,featMapFinal] = detectComets3D(I,stepSize,thresh,pxlscale)
 % 
 % 
 %
-% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

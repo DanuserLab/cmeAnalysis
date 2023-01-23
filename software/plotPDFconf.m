@@ -57,7 +57,7 @@ fig_pdf = distnObj_plotPDFs_BootCI(Tab{1}, Tab{2}, CondName{1}, CondName{2}, var
 % distnObj_plotCDFs_BootCI
 %fig_cdf = distnObj_plotCDFs_BootCI(DO_1, DO_2, CondName{1}, CondName{2}, varName, 'save', save);
 %
-% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

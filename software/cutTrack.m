@@ -1,7 +1,7 @@
 %[tracks] = cutTrack(track, cutIdx) splits a track at the specified indexes
 % The index positions are excluded from the resulting segments
 %
-% Copyright (C) 2022, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
