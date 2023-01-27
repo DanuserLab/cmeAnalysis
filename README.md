@@ -20,6 +20,6 @@ For more information, please read the [User Guide](https://github.com/DanuserLab
 
 
 ----------------------
-[Danuser Lab Website](https://www.utsouthwestern.edu/labs/danuser/)
+[Danuser Lab Website](https://www.danuserlab-utsw.org/)
 
-[Software Links](https://www.utsouthwestern.edu/labs/danuser/software/)
+[Software Links](https://github.com/DanuserLab)
