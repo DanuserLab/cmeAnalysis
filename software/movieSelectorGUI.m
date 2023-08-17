@@ -224,6 +224,7 @@ packageList = {
     'FishATLASPackage'
     'GrangerCausalityAnalysisPackage'
     'uSignal3DPackage'
+    'InfoFlowPackage'
     };
 validPackage = cellfun(@(x) exist(x,'class')==8,packageList);
 packageList = packageList(validPackage);
