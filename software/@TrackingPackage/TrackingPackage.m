@@ -43,7 +43,7 @@ classdef TrackingPackage < Package
     methods (Static)
         
         function name = getName()
-            name = 'U-Track';
+            name = 'U-Track (2D)';
         end 
         function m = getDependencyMatrix(i,j)   
             m = [0 0 0;  %1 DetectionProcess
