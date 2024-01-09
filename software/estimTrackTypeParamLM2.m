@@ -36,7 +36,7 @@ function [trackType,xyzVel,noiseStd,trackCenter,trackMeanDispMag,errFlag] = ...
 %
 %Khuloud Jaqaman, April 2007
 %
-% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

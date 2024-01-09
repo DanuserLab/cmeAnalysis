@@ -27,7 +27,7 @@ function C = pcombs(v,keepDiag)
 %   4  3
 %   3  3
 %
-% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

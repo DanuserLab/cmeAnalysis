@@ -29,7 +29,7 @@ pdf = A * 1/mu * exp(-1/mu*ti);
 v = pdf-ni;
 v(isnan(v)) = [];
 %
-% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

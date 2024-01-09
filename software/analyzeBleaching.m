@@ -1,7 +1,7 @@
 %analyzeBleaching(data) generates plots of mean intensity values over time 
 % to characterize bleaching
 %
-% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

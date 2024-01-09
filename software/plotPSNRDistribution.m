@@ -1,6 +1,6 @@
 %[psnr] = getPSNRDistribution(data, varargin) plots the PSNR distribution for the detections in 'data'.
 %
-% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

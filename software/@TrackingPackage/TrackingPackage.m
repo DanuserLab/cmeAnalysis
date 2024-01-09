@@ -1,7 +1,7 @@
 classdef TrackingPackage < Package
     % An abstract class for a geeneric Tracking Package
 %
-% Copyright (C) 2023, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
@@ -43,7 +43,7 @@ classdef TrackingPackage < Package
     methods (Static)
         
         function name = getName()
-            name = 'u-track (2d)';
+            name = 'u-track';
         end 
         function m = getDependencyMatrix(i,j)   
             m = [0 0 0;  %1 DetectionProcess
