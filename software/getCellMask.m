@@ -2,7 +2,7 @@
 %
 % Notes: for the 'bgproj' method, the detection must be run before
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

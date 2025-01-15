@@ -5,7 +5,7 @@
 %    rangeIn : input range. If empty, [min(in(:)) max(in(:))]
 %   rangeOut : output range
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

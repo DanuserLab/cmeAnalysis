@@ -5,7 +5,7 @@ fset = loadFigureSettings('print');
 mu = cellfun(@(i) mean(i.cellArea), lftRes);
 %sigma = cellfun(@(i) std(i.cellArea), lftRes);
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

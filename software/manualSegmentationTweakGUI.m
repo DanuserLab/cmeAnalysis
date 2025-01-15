@@ -47,7 +47,7 @@ function [m,isDone] = manualSegmentationTweakGUI(im,m,displayrange,isDone,ptsSho
 %   ( OR ) - Decrease/increase contrast by adjusting lower display limit
 %
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

@@ -10,7 +10,7 @@
 %      s : sorted array
 %     rm : index of input that did not match token and was excluded from output
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

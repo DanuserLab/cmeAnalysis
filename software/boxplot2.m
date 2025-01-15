@@ -34,7 +34,7 @@
 % Francois Aguet, 22 Feb 2011 (Last modified: 06/14/2013)
 % Andrew R. Jamieson, Dec 2016 -- setErrorbars deprecated now.
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

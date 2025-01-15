@@ -1,6 +1,6 @@
 % colors = getHuesFromMarkers(markers) assigns primary hues to the markers
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

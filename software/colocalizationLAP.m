@@ -9,7 +9,7 @@
 %    idx1 : index of matched points in the first set 
 %    idx2 : index of corresponding points in the second set
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

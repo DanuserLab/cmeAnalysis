@@ -1,7 +1,7 @@
 %plotIntensityDistributions(data, varargin) displays the average intensity of 
 % the first 10 frames of all trajectories as a function of lifetime cohort
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

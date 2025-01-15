@@ -2,7 +2,7 @@ function pooledVec = balancedPooling(dataCell)
 %
 % J Noh, 2017/11/20
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

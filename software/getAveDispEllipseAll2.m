@@ -76,7 +76,7 @@ function [longVecS,longVecE,shortVecS,shortVecE,shortVecS3D,shortVecE3D,...
 %
 %Khuloud Jaqaman, April 2007
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

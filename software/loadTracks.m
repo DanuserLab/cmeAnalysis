@@ -15,7 +15,7 @@
 %              'IIc' Compound tracks cut at beginning or end
 %              'IId' Compound tracks, persistent
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

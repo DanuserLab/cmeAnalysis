@@ -13,7 +13,7 @@ function [out, G] = filterGauss1D(signal, sigma, borderCondition)
 %
 % Francois Aguet, added 01/21/2010
 %
-% Copyright (C) 2024, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
