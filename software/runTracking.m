@@ -15,7 +15,7 @@
 %
 % Example: runTracking(data, loadTrackSettings('Radius', [3 6], 'MaxGapLength', 2), 'Overwrite', true) ;
 %
-% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2026, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

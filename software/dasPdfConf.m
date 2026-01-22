@@ -9,7 +9,7 @@ ip.addRequired('idx', @iscell);
 ip.addParameter('LT_not_Imax', true, @islogical);
 %==========================================================================
 %
-% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2026, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

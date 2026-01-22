@@ -10,7 +10,7 @@
 %              xi : sample space vector
 %               g : Gaussian calculated on xi
 %
-% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2026, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 

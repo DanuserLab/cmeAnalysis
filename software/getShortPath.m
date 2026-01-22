@@ -1,6 +1,6 @@
 %spath = getShortPath(data) returns the truncated path of a cell directory (3 levels) 
 %
-% Copyright (C) 2025, Danuser Lab - UTSouthwestern 
+% Copyright (C) 2026, Danuser Lab - UTSouthwestern 
 %
 % This file is part of CMEAnalysis_Package.
 % 
