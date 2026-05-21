@@ -197,7 +197,7 @@ function varargout=sigstar(groups,stats,nosort)
     H=ones(length(groups),2); %The handles will be stored here
 
     y=ylim;
-    yd=myRange(y)*0.06; %separate sig bars vertically by 5% 
+    yd=myRange(y)*0.05; %separate sig bars vertically by 5% 
 
     for ii=1:length(groups)
         thisY=findMinY(xlocs(ii,:))+yd;
@@ -258,7 +258,7 @@ function H=makeSignificanceBar(x,y,p)
     elseif p<=0.05
         stars='*';
     elseif isnan(p)
-        stars='';
+        stars='n.s.';
     else
         stars='';
     end
@@ -266,12 +266,12 @@ function H=makeSignificanceBar(x,y,p)
     x=repmat(x,2,1);
     y=repmat(y,4,1);
 
-    H(1)=plot(x(:),y,'-k','LineWidth',1,'Tag','sigstar_bar');
+    H(1)=plot(x(:),y,'-k','LineWidth',1.5,'Tag','sigstar_bar');
 
     %Increase offset between line and text if we will print "n.s."
     %instead of a star. 
     if ~isnan(p)
-        offset=0.02;
+        offset=0.005;
     else
         offset=0.02;
     end
@@ -280,7 +280,7 @@ function H=makeSignificanceBar(x,y,p)
     H(2)=text(mean(x(:)),starY,stars,...
         'HorizontalAlignment','Center',...
         'BackGroundColor','none',...
-        'Tag','sigstar_stars','FontSize',8);
+        'Tag','sigstar_stars');
 
     Y=ylim;
     if Y(2)<starY
@@ -303,7 +303,16 @@ function Y=findMinY(x)
     oldYLim = get(gca,'YLim');
 
     axis(gca,'tight')
-    set(gca,'xlim',x) %Matlab automatically re-tightens y-axis
+    
+    %increase range of x values by 0.1 to ensure correct y max is used
+    x(1)=x(1)-0.1;
+    x(2)=x(2)+0.1;
+
+    % The following not needed if we have a CategoricalRuler, where it
+    % fails anyway
+    if ~isa(get(gca,'XAxis'),'matlab.graphics.axis.decorator.CategoricalRuler')
+        set(gca,'xlim',x) %Matlab automatically re-tightens y-axis
+    end
 
     yLim = get(gca,'YLim'); %Now have max y value of all elements within range.
     Y = max(yLim);
